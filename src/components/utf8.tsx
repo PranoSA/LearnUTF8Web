@@ -4,7 +4,6 @@ const base_url_api = "https://codepoints.net/api/v1/codepoint/";
 
 import { Buffer } from "buffer";
 
-function analyzeBinaryRepresentation(){}
 
 /*
     Represents the Maximum Value for the preceeding bytes of a 2 string UTF-8 sequence
