@@ -44,10 +44,10 @@ const Application = () => {
         catch(e){
             setApplication ({
                 appid : "0",
-                name : "Error",
-                created_at : "Error",
-                updated_at : "Error",
-                description : "Error",
+                name : "New Application",
+                created_at : "now",
+                updated_at : "now",
+                description : "now",
                 conversions : [],
             })
             console.log(e)
