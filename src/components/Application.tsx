@@ -87,7 +87,11 @@ const Application = () => {
          await response.json()
     }
 
-    const AnalyzePanel =  (analyzedString:Utf8Examination) => {
+
+    //Add A Prop That is a function that can be called to modify the the conversion value
+    //For that conversion, then call the function with the new value
+    //from the increment and decrement functionality
+    const AnalyzePanel =  (analyzedString:Utf8Examination, index:number) => {
 
 
         /*
@@ -114,26 +118,74 @@ const Application = () => {
                 byte_hex : byte_bin
                 byte_dec(byte_mask) * multiplier = result 
                 Calculated Decimal Value = result_hexadecimal
+
+
+            Add a button that decrements the position by 1 and displays the new analyzedString
+            Add a button that increments the position by 1 and displays the new analyzedString
+
+            You would need to reanalyze the string to get the new analyzedString
+
+            Add a Button That Ups the U+ Value For that codepoint instead of the byte 
         */
 
         return (
             <div>
+                <div>----------------------------------------------------------</div>
                 <div>Code point at Position {analyzedString.position}:U+{analyzedString.codePoint}</div>
                 <div>Number of Bytes : {analyzedString.numBytes}</div>
                 <div>Grapheme #: {analyzedString.grapheme}</div>
-                <div>textRepresentation : {analyzedString.codePoint}</div>
+                <div>textRepresentation : {analyzedString.characterString}</div>
                 <div>Name: {analyzedString.characterName}</div>
                 <div>Raw Hex Representation: {analyzedString.hexRepresentation}</div>
-                <div>for each    addUp : {analyzedString.addUps.map((addup) => {
+
+
+                <div>for each    addUp : {analyzedString.addUps.map((addup, pos) => {
                     return (
                         <div>
+                        <div> byte : {pos} </div>
                         <div>byte_hex : {addup.byte_hex}</div>
                         <div>byte_bin : {addup.byte_bin}</div>
                         <div>byte_dec : {addup.byte_mask} * {addup.multiplier} = {addup.result}</div>
                         <div> accumulation : hex-{addup.accumulation_hex} dec-{addup.accumulation_dec} </div>
+                        <button onClick={
+                            async () => {
+                                
+                                const newApplication = {...application}
+                                //How To Decrement The Value
+                                const currentBytes = Buffer.from(newApplication.conversions[index].value)
+                                currentBytes[pos+analyzedString.position]++;
+                                //Get the String 
+                                const new_string = currentBytes.toString('utf-8')
+                                newApplication.conversions[index].value = new_string
+                                setApplication(newApplication)
+                                const newState = await analyzeUtf8String(currentBytes)
+                                //Only Change This Index in the derivedState
+                                setStringAnalyzed([...stringAnalyzed.slice(0,index), newState,...stringAnalyzed.slice(index+1) ])
+                            }
+                        }>
+                            Increment Byte </button>
+                            <button onClick={
+                            async () => {
+                                
+                                const newApplication = {...application}
+                                //How To Decrement The Value
+                                const currentBytes = Buffer.from(newApplication.conversions[index].value)
+                                currentBytes[pos+analyzedString.position]--;
+                                //Get the String 
+                                const new_string = currentBytes.toString('utf-8')
+                                newApplication.conversions[index].value = new_string
+                                setApplication(newApplication)
+                                const newState = await analyzeUtf8String(currentBytes)
+                                //Only Change This Index in the derivedState
+                                setStringAnalyzed([...stringAnalyzed.slice(0,index), newState,...stringAnalyzed.slice(index+1) ])
+                            }
+                        }>
+                            Decrement Byte 
+                        </button>
                         </div>
                     )
                 })}</div>
+
             </div>
         )
 
@@ -228,8 +280,44 @@ const Application = () => {
                                 }, 2000)
                             }} />
                             {stringAnalyzed[index].map((stringAnalyzed) => {
+                                //Analyze Panel, Displaying the stringAnalyzed
+                                //And A button that changes the state by incrementing the Unicode Value 
+                                //This function gets iterates through the lsit of codepoints in stringAnalyzed
+                                //Add Button That increments the current codepoint and displays the new stringAnalyzed
                                 return (
-                                    AnalyzePanel(stringAnalyzed)
+                                    <div>
+        
+                                        <button onClick={() => {
+                                            //Increment Current Code Point and Recompute String??
+                                            const current_string = Buffer.from(application.conversions[index].value)
+                                            const codePointToModify = current_string.toString('utf-8').codePointAt(index)
+                                            if(!codePointToModify){
+                                                return 
+                                            }
+                                            const new_codePoint = codePointToModify + 1
+                                            const new_string = current_string.toString('utf-8').replace(String.fromCodePoint(codePointToModify), String.fromCodePoint(new_codePoint))
+                                            //Set State with new string 
+                                            const newApplication = {...application}
+                                            newApplication.conversions[index].value = new_string
+                                            setApplication(newApplication)
+                                        }}>Increment Code Point</button>
+                                                                         <button onClick={() => {
+                                            //Increment Current Code Point and Recompute String??
+                                            const current_string = Buffer.from(application.conversions[index].value)
+                                            const codePointToModify = current_string.toString('utf-8').codePointAt(index)
+                                            if(!codePointToModify){
+                                                return 
+                                            }
+                                            const new_codePoint = codePointToModify - 1
+                                            //Problem Here is if there is duplicates in stringAnalyzed
+                                            const new_string = current_string.toString('utf-8').replace(String.fromCodePoint(codePointToModify), String.fromCodePoint(new_codePoint))
+                                            //Set State with new string 
+                                            const newApplication = {...application}
+                                            newApplication.conversions[index].value = new_string
+                                            setApplication(newApplication)
+                                        }}>Decrement Code Point</button>
+                                        {AnalyzePanel(stringAnalyzed, index)}
+                                    </div>
                                 )
                             })}
                         </div>
