@@ -279,7 +279,7 @@ const Application = () => {
                                     //setStringAnalyzed(derivedState.current[index])
                                 }, 2000)
                             }} />
-                            {stringAnalyzed[index].map((stringAnalyzed) => {
+                            {stringAnalyzed[index].map((stringAnalyzed2) => {
                                 //Analyze Panel, Displaying the stringAnalyzed
                                 //And A button that changes the state by incrementing the Unicode Value 
                                 //This function gets iterates through the lsit of codepoints in stringAnalyzed
@@ -287,7 +287,7 @@ const Application = () => {
                                 return (
                                     <div>
         
-                                        <button onClick={() => {
+                                        <button onClick={async() => {
                                             //Increment Current Code Point and Recompute String??
                                             const current_string = Buffer.from(application.conversions[index].value)
                                             const codePointToModify = current_string.toString('utf-8').codePointAt(index)
@@ -300,8 +300,14 @@ const Application = () => {
                                             const newApplication = {...application}
                                             newApplication.conversions[index].value = new_string
                                             setApplication(newApplication)
+
+                                            //Now Set New Computed String Analyzed
+                                            const newState = await analyzeUtf8String(Buffer.from(new_string))
+                                            //Only Change This Index in the derivedState
+
+                                            setStringAnalyzed([...stringAnalyzed.slice(0,index), newState,...stringAnalyzed.slice(index+1) ])
                                         }}>Increment Code Point</button>
-                                                                         <button onClick={() => {
+                                                                         <button onClick={async() => {
                                             //Increment Current Code Point and Recompute String??
                                             const current_string = Buffer.from(application.conversions[index].value)
                                             const codePointToModify = current_string.toString('utf-8').codePointAt(index)
@@ -315,8 +321,13 @@ const Application = () => {
                                             const newApplication = {...application}
                                             newApplication.conversions[index].value = new_string
                                             setApplication(newApplication)
+                                                                                        //Now Set New Computed String Analyzed
+                                            const newState = await analyzeUtf8String(Buffer.from(new_string))
+                                                                                        //Only Change This Index in the derivedState
+                                            
+                                            setStringAnalyzed([...stringAnalyzed.slice(0,index), newState,...stringAnalyzed.slice(index+1) ])   
                                         }}>Decrement Code Point</button>
-                                        {AnalyzePanel(stringAnalyzed, index)}
+                                        {AnalyzePanel(stringAnalyzed2, index)}
                                     </div>
                                 )
                             })}
