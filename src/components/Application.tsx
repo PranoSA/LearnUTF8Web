@@ -32,8 +32,6 @@ const Application = () => {
     const [ stringAnalyzed, setStringAnalyzed ] = useState<Utf8Examination [][]>([])
 
 
-    console.log("Rendered")
-
     useEffect(() => {
         const fetchApplication = async () => {
             const response = await fetch(`http://localhost:8080/applications/${applicationId}`)
@@ -130,7 +128,7 @@ const Application = () => {
 
         return (
             <div>
-                <div>----------------------------------------------------------</div>
+                
                 <div>Code point at Position {analyzedString.position}:U+{analyzedString.codePoint}</div>
                 <div>Number of Bytes : {analyzedString.numBytes}</div>
                 <div>Grapheme #: {analyzedString.grapheme}</div>
@@ -279,23 +277,38 @@ const Application = () => {
                                     //setStringAnalyzed(derivedState.current[index])
                                 }, 2000)
                             }} />
-                            {stringAnalyzed[index].map((stringAnalyzed2) => {
+                            {stringAnalyzed[index].map((stringAnalyzed2, code_point) => {
                                 //Analyze Panel, Displaying the stringAnalyzed
                                 //And A button that changes the state by incrementing the Unicode Value 
                                 //This function gets iterates through the lsit of codepoints in stringAnalyzed
                                 //Add Button That increments the current codepoint and displays the new stringAnalyzed
                                 return (
                                     <div>
-        
+                                        <div>----------------------------------------------------------</div>
                                         <button onClick={async() => {
                                             //Increment Current Code Point and Recompute String??
-                                            const current_string = Buffer.from(application.conversions[index].value)
-                                            const codePointToModify = current_string.toString('utf-8').codePointAt(index)
+                                            //const current_string = Buffer.from(application.conversions[index].value,'utf-16le')
+                                            //Get actual string 
+                                            const current_string = application.conversions[index].value
+
+                                            //
+
+                                            //Get the code_point'th unicode code point from the string
+
+
+                                            const codePointToModify = application.conversions[index].value.codePointAt(code_point*2)
+
+                                            //const codePointToModify = current_string.toString('utf-8').codePointAt(code_point)
+                                            if(!codePointToModify){
+                                                return 
+                                            }
+                                            console.log("Index" +code_point)
+                                            console.group(codePointToModify)
                                             if(!codePointToModify){
                                                 return 
                                             }
                                             const new_codePoint = codePointToModify + 1
-                                            const new_string = current_string.toString('utf-8').replace(String.fromCodePoint(codePointToModify), String.fromCodePoint(new_codePoint))
+                                            const new_string = current_string.toString().replace(String.fromCodePoint(codePointToModify), String.fromCodePoint(new_codePoint))
                                             //Set State with new string 
                                             const newApplication = {...application}
                                             newApplication.conversions[index].value = new_string
@@ -308,24 +321,39 @@ const Application = () => {
                                             setStringAnalyzed([...stringAnalyzed.slice(0,index), newState,...stringAnalyzed.slice(index+1) ])
                                         }}>Increment Code Point</button>
                                                                          <button onClick={async() => {
-                                            //Increment Current Code Point and Recompute String??
-                                            const current_string = Buffer.from(application.conversions[index].value)
-                                            const codePointToModify = current_string.toString('utf-8').codePointAt(index)
+                                         //Increment Current Code Point and Recompute String??
+                                            //const current_string = Buffer.from(application.conversions[index].value,'utf-16le')
+                                            //Get actual string 
+                                            const current_string = application.conversions[index].value
+
+                                            //
+
+                                            //Get the code_point'th unicode code point from the string
+
+
+                                            const codePointToModify = application.conversions[index].value.codePointAt(code_point*2)
+
+                                            //const codePointToModify = current_string.toString('utf-8').codePointAt(code_point)
+                                            if(!codePointToModify){
+                                                return 
+                                            }
+                                            console.log("Index" +code_point)
+                                            console.group(codePointToModify)
                                             if(!codePointToModify){
                                                 return 
                                             }
                                             const new_codePoint = codePointToModify - 1
-                                            //Problem Here is if there is duplicates in stringAnalyzed
-                                            const new_string = current_string.toString('utf-8').replace(String.fromCodePoint(codePointToModify), String.fromCodePoint(new_codePoint))
+                                            const new_string = current_string.toString().replace(String.fromCodePoint(codePointToModify), String.fromCodePoint(new_codePoint))
                                             //Set State with new string 
                                             const newApplication = {...application}
                                             newApplication.conversions[index].value = new_string
                                             setApplication(newApplication)
-                                                                                        //Now Set New Computed String Analyzed
+
+                                            //Now Set New Computed String Analyzed
                                             const newState = await analyzeUtf8String(Buffer.from(new_string))
-                                                                                        //Only Change This Index in the derivedState
-                                            
-                                            setStringAnalyzed([...stringAnalyzed.slice(0,index), newState,...stringAnalyzed.slice(index+1) ])   
+                                            //Only Change This Index in the derivedState
+
+                                            setStringAnalyzed([...stringAnalyzed.slice(0,index), newState,...stringAnalyzed.slice(index+1) ])
                                         }}>Decrement Code Point</button>
                                         {AnalyzePanel(stringAnalyzed2, index)}
                                     </div>

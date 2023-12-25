@@ -94,13 +94,13 @@ function analyzeCodePointByteArray(byteArray: Buffer, numBytes:number):UTF8Addup
             accumulation_dec: accumulated_value.toString(10)
         })
 
-        console.log(`\t  ${next_byte.toString(16).padStart(2,'0')} : ${next_byte.toString(2).padStart(8, '0')}`);
-        console.log(`\t\t ${significant_bits.toString(10)}(${(significant_bits.toString(2).padStart(8-masked_bits,'0')).padStart(8,'x')}) * ${multiplier} = ${multiplier*significant_bits}`)
+        //console.log(`\t  ${next_byte.toString(16).padStart(2,'0')} : ${next_byte.toString(2).padStart(8, '0')}`);
+        //console.log(`\t\t ${significant_bits.toString(10)}(${(significant_bits.toString(2).padStart(8-masked_bits,'0')).padStart(8,'x')}) * ${multiplier} = ${multiplier*significant_bits}`)
 
     }
 
-    console.log(`\tCalculated Decimal Value = ${accumulated_value}`)
-    console.log(`\tCalculated Hexadecimal Value = ${accumulated_value.toString(16)}`)   
+    //console.log(`\tCalculated Decimal Value = ${accumulated_value}`)
+    //console.log(`\tCalculated Hexadecimal Value = ${accumulated_value.toString(16)}`)   
 
     return addUpResults
 
@@ -215,10 +215,10 @@ async function analyzeUtf8String(buffer:Buffer) :Promise<Utf8Examination[]> {
       }
 
 
-      console.log(`Code Point at position ${i}: U+${codePoint.toString(16)},   Number Bytes ${numBytes}, Grapheme ${which_grapheme} : ${String.fromCodePoint(codePoint)} : (${characterName})`);
+      //console.log(`Code Point at position ${i}: U+${codePoint.toString(16)},   Number Bytes ${numBytes}, Grapheme ${which_grapheme} : ${String.fromCodePoint(codePoint)} : (${characterName})`);
 
-      console.log(`\t Raw Hexdecimal Representation: ${subArray.toString('hex').padStart(2*numBytes, '0')} \n`)
-      console.log("Byte By Byte Calculation")
+      //console.log(`\t Raw Hexdecimal Representation: ${subArray.toString('hex').padStart(2*numBytes, '0')} \n`)
+      //console.log("Byte By Byte Calculation")
 
 
 
