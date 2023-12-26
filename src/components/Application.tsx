@@ -110,11 +110,12 @@ const Application = () => {
 
 
     useEffect(() => {
-        const fetchApplication = async () => {
+        /*const fetchApplication = async () => {
             const response = await fetch(`http://localhost:8080/applications/${applicationId}`)
             const data = await response.json()
             setApplication(data)
         }
+        */
         try {
         //fetchApplication()
         }
