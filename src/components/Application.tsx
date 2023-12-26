@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import {} from './utf8'
 import { analyzeUtf8String, Utf8Examination } from './utf8'
 //import { Buffer } from 'buffer'
@@ -30,6 +30,83 @@ const Application = () => {
     const { applicationId } = useParams<{ applicationId: string }>()
     const [application, setApplication] = useState<ApplicationType | null>(null)
     const [ stringAnalyzed, setStringAnalyzed ] = useState<Utf8Examination [][]>([])
+    const [searchParams] = useSearchParams();
+
+    /*
+    Add Functionality to be able to share the entire application state in a query string
+    Also Modify the query string in the URL when the application state changes
+    */
+
+    //Use Query Parameters
+
+    //Use Query Parameters to Save the Application State
+
+    //Use Query Parameters to Load the Application State
+
+    
+    //On Load, Load the Application State from the Query Parameters
+    useEffect(() => {
+        console.log("In The Set")
+        console.log(application)
+        if(!application) return 
+        //searchParams.set("appid", applicationId || "")
+        //Set searchParams for all application properties
+        searchParams.set("name", application?.name || "")
+        searchParams.set("created_at", application?.created_at || "")
+        searchParams.set("updated_at", application?.updated_at || "")
+        searchParams.set("description", application?.description || "")
+        searchParams.set("conversions",(JSON.stringify(application?.conversions))|| "")
+         console.log(searchParams.get('conversions'))
+         console.log(JSON.parse(decodeURIComponent(searchParams.get('conversions') || "[]")))
+        window.history.pushState({}, '', '?' + searchParams.toString());
+    }, [application])
+
+    useEffect(() => {
+
+        const asyncInitFunction = async () => {
+            console.log("In The Init")
+            console.log(searchParams.get('name'))
+        
+            //On Mount, Set all the Application Properties from the Query Parameters
+            const newApplication = {...application}
+            newApplication.appid = searchParams.get("appid") || ""
+            newApplication.name = searchParams.get("name") || ""
+            newApplication.created_at = searchParams.get("created_at") || ""
+            newApplication.updated_at = searchParams.get("updated_at") || ""
+            newApplication.description = searchParams.get("description") || ""
+            let newStringAnalyzed = [] as Utf8Examination[][]
+            try {
+            newApplication.conversions = JSON.parse(decodeURIComponent(searchParams.get("conversions") || "[]")) 
+                //On Mount, Set all the String Analyzed Properties from the Query Parameters
+                if(newApplication.conversions){
+                    const promises = newApplication.conversions.map(async (conversion) => {
+                        return analyzeUtf8String(Buffer.from(conversion.value))
+                    })
+                    newStringAnalyzed = await Promise.all(promises)
+                    console.log("String Analyzed")
+                    console.log(newStringAnalyzed)
+                }
+            }
+            catch(e){
+                console.log(e)
+            }
+            newApplication.conversions = newApplication.conversions || []
+            console.log("Loaded Application")
+            setApplication(newApplication as ApplicationType)
+            console.log(setStringAnalyzed)
+            setStringAnalyzed(newStringAnalyzed)
+            
+            console.log(newApplication.conversions)
+            console.log(searchParams.get("conversions"))
+        }
+
+            asyncInitFunction()
+        }
+
+    
+    ,[])
+
+    
 
 
     useEffect(() => {
@@ -39,30 +116,31 @@ const Application = () => {
             setApplication(data)
         }
         try {
-        fetchApplication()
+        //fetchApplication()
         }
         catch(e){
-            setApplication ({
+            /*setApplication ({
                 appid : "0",
                 name : "New Application",
                 created_at : "now",
                 updated_at : "now",
                 description : "now",
                 conversions : [],
-            })
+            })*/
             console.log(e)
         }
     }, [applicationId])
 
     if (!application) {
-        setApplication ({
+        console.log("Not Application")
+        /*setApplication ({
             appid : "0",
             name : "Error",
             created_at : "Error",
             updated_at : "Error",
             description : "Error",
             conversions : [],
-        })
+        })*/
         //return <div>Loading...</div>
     }
 
@@ -277,6 +355,7 @@ const Application = () => {
                                     //setStringAnalyzed(derivedState.current[index])
                                 }, 2000)
                             }} />
+
                             {stringAnalyzed[index].map((stringAnalyzed2, code_point) => {
                                 //Analyze Panel, Displaying the stringAnalyzed
                                 //And A button that changes the state by incrementing the Unicode Value 
