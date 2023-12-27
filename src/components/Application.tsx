@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { analyzeUtf8String, Utf8Examination } from './utf8'
 import {Buffer} from 'buffer';
@@ -29,6 +29,7 @@ const Application = () => {
     const [application, setApplication] = useState<ApplicationType | null>(null)
     const [ stringAnalyzed, setStringAnalyzed ] = useState<Utf8Examination [][]>([])
     const [searchParams] = useSearchParams();
+    const scrollRef = useRef<HTMLElement | null>(null);
 
     /*
     Add Functionality to be able to share the entire application state in a query string
@@ -41,6 +42,12 @@ const Application = () => {
 
     //Use Query Parameters to Load the Application State
 
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollIntoView({ behavior: 'smooth' });
+            scrollRef.current = null;
+        }
+    }, [stringAnalyzed, application]);
     
     //On Load, Load the Application State from the Query Parameters
     useEffect(() => {
@@ -189,7 +196,6 @@ const Application = () => {
             const newApplication = {...application}
             //How To Decrement The Value
             const currentBytes = Buffer.from(newApplication.conversions[index].value)
-            currentBytes[pos+analyzedString.position]++;
             currentBytes[pos+analyzedString.position] = increment ? currentBytes[pos+analyzedString.position] + 1 : currentBytes[pos+analyzedString.position] - 1
             //Get the String 
             const new_string = currentBytes.toString('utf-8')
@@ -305,7 +311,7 @@ const Application = () => {
                 setStringAnalyzed([...stringAnalyzed.slice(0,index), newState,...stringAnalyzed.slice(index+1)])
         }
 
-        const changeCodepoint = async (index:number, code_point:number, increment:boolean) => {
+        const changeCodepoint = async (e:React.MouseEvent, index:number, code_point:number, increment:boolean) => {
                 //Increment Current Code Point and Recompute String??
                 const current_string = application.conversions[index].value
 
@@ -332,6 +338,8 @@ const Application = () => {
                 //Only Change This Index in the derivedState
 
                 setStringAnalyzed([...stringAnalyzed.slice(0,index), newState,...stringAnalyzed.slice(index+1) ])
+                
+                scrollRef.current = e.currentTarget as HTMLElement
             }
 
             const initializeCodepoint = () => {
@@ -395,10 +403,10 @@ const Application = () => {
                                     <div className="flex flex-wrap items-center justify-around space-y-12 ">
                                         <div className="flex border-t border-gray-200 my-2 w-full">----------------------------------------------------------</div>
                                         <div className='w-1/2'>
-                                            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={() => changeCodepoint(index, code_point, true)}>Increment Code Point</button>
+                                            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index, code_point, true)}>Increment Code Point</button>
                                         </div>
                                         <div className='w-1/2'>
-                                            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={() => changeCodepoint(index,code_point, false)}>Decrement Code Point</button>
+                                            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index,code_point, false)}>Decrement Code Point</button>
                                         </div>
                                         {AnalyzePanel(stringAnalyzed2, index)}
                                     </div>
