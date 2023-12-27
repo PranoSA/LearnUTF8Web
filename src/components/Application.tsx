@@ -184,7 +184,7 @@ const Application = () => {
         */
 
 
-        const changeByte =  async (e:React.MouseEvent, index:number,pos:number, increment:boolean) => {
+        const changeByte =  async ( index:number,pos:number, increment:boolean) => {
                                 
             const newApplication = {...application}
             //How To Decrement The Value
@@ -233,8 +233,8 @@ const Application = () => {
                             <div className='w-full'> Dec - {(addup.accumulation_dec)}</div>
                             <div className = "w-full"> Hex - 0x{(addup.accumulation_hex)}</div>
                             <div className="w-full flex justify-around">
-                            <button className='bg-blue-500 p-5 text-white px-4 ' onClick={(e) => changeByte(e, index, pos, true)}>Increment Byte</button>
-                            <button className='bg-red-500 p-5 text-white px-4' onClick={(e) => changeByte(e, index, pos, false)}>Decrement Byte</button>
+                            <button className='bg-blue-500 p-5 text-white px-4 ' onClick={() => changeByte( index, pos, true)}>Increment Byte</button>
+                            <button className='bg-red-500 p-5 text-white px-4' onClick={() => changeByte( index, pos, false)}>Decrement Byte</button>
                             </div>
                         </div>
                     )
@@ -305,7 +305,7 @@ const Application = () => {
                 setStringAnalyzed([...stringAnalyzed.slice(0,index), newState,...stringAnalyzed.slice(index+1)])
         }
 
-        const changeCodepoint = async (e:React.MouseEvent, index:number, code_point:number, increment:boolean) => {
+        const changeCodepoint = async (index:number, code_point:number, increment:boolean) => {
                 //Increment Current Code Point and Recompute String??
                 const current_string = application.conversions[index].value
 
@@ -395,10 +395,10 @@ const Application = () => {
                                     <div className="flex flex-wrap items-center justify-around space-y-12 ">
                                         <div className="flex border-t border-gray-200 my-2 w-full">----------------------------------------------------------</div>
                                         <div className='w-1/2'>
-                                            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e, index, code_point, true)}>Increment Code Point</button>
+                                            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={() => changeCodepoint(index, code_point, true)}>Increment Code Point</button>
                                         </div>
                                         <div className='w-1/2'>
-                                            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index,code_point, false)}>Decrement Code Point</button>
+                                            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={() => changeCodepoint(index,code_point, false)}>Decrement Code Point</button>
                                         </div>
                                         {AnalyzePanel(stringAnalyzed2, index)}
                                     </div>
@@ -408,7 +408,7 @@ const Application = () => {
                     )
                 })}
                 </div>
-                <button onClick={(e) => initializeCodepoint()} className="bg-green-500 text-white px-4 py-2 rounded">Add</button>
+                <button onClick={() => initializeCodepoint()} className="bg-green-500 text-white px-4 py-2 rounded">Add</button>
             </div>
         )
         
