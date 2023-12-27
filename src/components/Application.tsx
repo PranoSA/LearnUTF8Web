@@ -42,12 +42,6 @@ const Application = () => {
 
     //Use Query Parameters to Load the Application State
 
-    useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollIntoView({ behavior: 'smooth' });
-            scrollRef.current = null;
-        }
-    }, [stringAnalyzed, application]);
     
     //On Load, Load the Application State from the Query Parameters
     useEffect(() => {
@@ -130,6 +124,13 @@ const Application = () => {
         }
     }, [applicationId])
 
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollIntoView({ behavior: 'smooth' });
+            scrollRef.current = null;
+        }
+    }, [stringAnalyzed, application]);
+
     if(!application){
         return <div> </div>
     }
@@ -155,7 +156,7 @@ const Application = () => {
     //from the increment and decrement functionality
     const AnalyzePanel =  (analyzedString:Utf8Examination, index:number) => {
 
-
+            
         /*
             Flex Size = 4 in Large, 6 in Medium, 12 in Small
             Space Around = Max
@@ -207,7 +208,7 @@ const Application = () => {
         }
 
         return (
-            <div className='flex flex-wrap w-full border border-red-500 '>
+            <div className='flex flex-wrap md:w-full border border-red-500 ' key={analyzedString.characterString}>
                 <div className='w-full'>Grapheme # : {analyzedString.grapheme}</div>
                 <div className='w-full'>
                     Code point at Position {analyzedString.position} : U+{analyzedString.codePoint}
@@ -224,7 +225,7 @@ const Application = () => {
                 <div className="flex w-full border border-blue-600" >
                     {analyzedString.addUps.map((addup, pos) => {
                     return (
-                        <div className='flex flex-wrap w-1/2 border border-green-500 justify-right p-4'>
+                        <div className='flex flex-wrap w-full md:w-1/2 border border-green-500 justify-right p-4' key={addup.accumulation_hex}>
                             <div className='w-full'> Byte # {pos} </div>
                             <div className = 'w-full'> Hex Representation : 0x{addup.byte_hex} </div>
                             <div className='w-full'> Binary Representation : 0b{addup.byte_bin} </div>
@@ -249,6 +250,8 @@ const Application = () => {
             </div>
         )
     }
+
+    
 
 
 
@@ -309,6 +312,7 @@ const Application = () => {
                 const newState = await analyzeUtf8String(Buffer.from(e.target.value))
                 setApplication(newApplication)
                 setStringAnalyzed([...stringAnalyzed.slice(0,index), newState,...stringAnalyzed.slice(index+1)])
+                scrollRef.current = e.currentTarget as HTMLElement
         }
 
         const changeCodepoint = async (e:React.MouseEvent, index:number, code_point:number, increment:boolean) => {
@@ -392,7 +396,7 @@ const Application = () => {
                     return (
                         <div className="flex flex-wrap justify-around w-full"> 
                             <div className='w-full flex justify-center p-20 '>
-                                <input className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/4" type="text" value={conversion.value} onChange={(e) => handleTextInputChange(e,index)} autoFocus/>
+                                <input className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/4" type="text" value={conversion.value} onChange={(e) => handleTextInputChange(e,index)} />
                             </div>
                             {stringAnalyzed[index].map((stringAnalyzed2, code_point) => {
                                 //Analyze Panel, Displaying the stringAnalyzed
@@ -400,7 +404,7 @@ const Application = () => {
                                 //This function gets iterates through the lsit of codepoints in stringAnalyzed
                                 //Add Button That increments the current codepoint and displays the new stringAnalyzed
                                 return (
-                                    <div className="flex flex-wrap items-center justify-around space-y-12 ">
+                                    <div className="flex flex-wrap items-center justify-around space-y-12 "key={stringAnalyzed2.characterString}>
                                         <div className="flex border-t border-gray-200 my-2 w-full">----------------------------------------------------------</div>
                                         <div className='w-1/2'>
                                             <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index, code_point, true)}>Increment Code Point</button>
@@ -421,6 +425,8 @@ const Application = () => {
         )
         
     }
+
+    
 
     //Display Application Display + Save Button Styled With Tailwind CSS
     return (
