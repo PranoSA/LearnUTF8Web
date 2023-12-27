@@ -6,7 +6,6 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
-import "./index.css";
 import Saved from './components/Saved.tsx';
 import Application from './components/Application.tsx';
 
