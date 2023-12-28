@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 import { useEffect, useRef, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { analyzeUtf8String, Utf8Examination } from './utf8'
 import {Buffer} from 'buffer';
 
@@ -30,6 +30,9 @@ const Application = () => {
     const [ stringAnalyzed, setStringAnalyzed ] = useState<Utf8Examination [][]>([])
     const [searchParams] = useSearchParams();
     const scrollRef = useRef<HTMLElement | null>(null);
+
+    const [showModal, setShowModal] = useState<boolean>(false)
+    const [username, setUsername] = useState<string|null>(localStorage.getItem('username'))
 
     /*
     Add Functionality to be able to share the entire application state in a query string
@@ -60,6 +63,11 @@ const Application = () => {
         window.history.pushState({}, '', '?' + searchParams.toString());
         console.log(application);
         console.log(stringAnalyzed)
+        if (scrollRef.current) {
+            console.log("Scroll Ref")
+            console.log(scrollRef.current)
+            scrollRef.current.focus();
+        }
     }, [application])
 
     useEffect(() => {
@@ -110,24 +118,32 @@ const Application = () => {
     
 
     useEffect(() => {
-        /*const fetchApplication = async () => {
-            const response = await fetch(`http://localhost:8080/applications/${applicationId}`)
+        const fetchApplication = async () => {
+            if(application?.appid === undefined) return
+            
+            const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/application/${application.appid}`)
             const data = await response.json()
             setApplication(data)
         }
-        */
-        try {
-        //fetchApplication()
-        }
-        catch(e){
-            console.log(e)
+        if(applicationId){
+                try {
+                fetchApplication()
+                }
+                catch(e){
+                    console.log(e)
+                }
         }
     }, [applicationId])
 
     useEffect(() => {
-        if (scrollRef.current) {
+        /*if (scrollRef.current) {
             scrollRef.current.scrollIntoView({ behavior: 'smooth' });
             scrollRef.current = null;
+        }*/
+        if (scrollRef.current) {
+            console.log("Scroll Ref")
+            console.log(scrollRef.current)
+            scrollRef.current.focus();
         }
     }, [stringAnalyzed, application]);
 
@@ -139,8 +155,16 @@ const Application = () => {
     const saveApplication = async () => {
         //Fetch Application From https://${process.env.REACT_APP_API_URL}/applications/${applicationId}
         //Post Application to https://${process.env.REACT_APP_API_URL}/saved/${applicationId}
+
+        if(!username){
+            setShowModal(true)
+            return
+        }
+
+        document.cookie = `user=${username}`;
         
-        const response = await fetch(`http://${import.meta.env.VITE_REACT_APP_API_URL}/applications/${applicationId}`, {
+        if(application == null) return 
+        const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/application`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -307,12 +331,14 @@ const Application = () => {
 
         const handleTextInputChange = async (e:React.ChangeEvent<HTMLInputElement>, index:number) => {
                 const newApplication = {...application}
+                console.log(e.currentTarget)
+                console.log("Change Scroll Ref")
+                scrollRef.current = e.currentTarget as HTMLElement
                 newApplication.conversions[index].value = e.target.value
                 setApplication(newApplication)
                 const newState = await analyzeUtf8String(Buffer.from(e.target.value))
                 setApplication(newApplication)
-                setStringAnalyzed([...stringAnalyzed.slice(0,index), newState,...stringAnalyzed.slice(index+1)])
-                scrollRef.current = e.currentTarget as HTMLElement
+                setStringAnalyzed([...stringAnalyzed.slice(0,index), newState,...stringAnalyzed.slice(index+1)])  
         }
 
         const changeCodepoint = async (e:React.MouseEvent, index:number, code_point:number, increment:boolean) => {
@@ -375,16 +401,43 @@ const Application = () => {
                 ]])
             }
 
-
-        return (
-            <div className="flex flex-wrap space-y-12 w-full justify-around">  
-                <div className='w-full'>
-                    <h1 > Application Details: </h1>
+            /*
+                                <h1 > Application Details: </h1>
                     <h1 className="text-2xl font-bold">{application.name}</h1>
                     <p>{application.description}</p>
                     <p>{application.created_at}</p>
                     <p>{application.updated_at}</p>
                     <p>{application.appid}</p>
+                    */
+
+            if(showModal){
+                return (
+                    <div>
+                        <h2>Please enter your username</h2>
+                        <input type="text" value={username||""} onChange={e => setUsername(e.target.value)} />
+                        <button onClick={() => {
+                            localStorage.setItem('username', username||"");
+                            setShowModal(false);
+                            saveApplication();
+                        }}>
+                            Submit
+                        </button>
+                 </div>
+                )
+            }
+
+
+        return (
+            <div className="flex flex-wrap space-y-12 w-full justify-around">  
+                <div className='w-full'>
+                    <h1 > Application Details: </h1>
+
+                    <input type="text"  value={application.name} onChange={e => setApplication({...application, name:e.target.value})} />
+                    <input type="text" value={application.description} onChange={e => setApplication({...application, description:e.target.value})}/>
+                    <input type="text" value={application.created_at} onChange={e => setApplication({...application, created_at:e.target.value})} />
+                    <input type="text" value={application.updated_at} onChange={e => setApplication({...application, updated_at:e.target.value})}/>
+                    <input type="text" value={application.appid} onChange={e => setApplication({...application, appid:e.target.value})} />
+
                 </div>
 
                 <div className='w-full'> -------------------------------------------------------------------------------------------------------------------------------</div>
@@ -431,8 +484,13 @@ const Application = () => {
     //Display Application Display + Save Button Styled With Tailwind CSS
     return (
         <div className='flex flex-wrap justify-center'>
+            <div className='w-full p-20'> 
+                <Link to="/saved">
+                    <button>View Saved</button>
+                </Link>
+            </div> 
             <div className='flex pt-20 pb-45 w-full justify-center'>
-                <button className="bg-blue-400 text-white px-4 py-2 rounded" onClick={saveApplication}>Save</button>
+                <button className="bg-blue-400 text-white px-4 py-2 rounded" onClick={() => saveApplication()}>Save</button>
             </div>
             <div className='flex w-full pl-60 '>
                 <ApplicationDisplay />

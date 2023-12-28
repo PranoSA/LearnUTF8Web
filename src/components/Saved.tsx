@@ -23,14 +23,57 @@ const Saved = () => {
 
     const [savedApplications, setSavedApplications] = useState<SavedApplication[]>([])
 
+    const [username, setUsername]= useState<string | null>(localStorage.getItem('user'));
+
+    const [showModal, setShowModal] = useState<boolean>(false)
+
+    
+
     useEffect(() => {
+
+        if(username != null){
+            setShowModal(false)
+        }
+
+        if(showModal){
+            return
+        }
+
         const fetchSavedApplications = async () => {
-            const response = await fetch('http://localhost:8080/saved')
+            if(username === null){
+                setUsername('ssd123')
+            }
+            /*
+            document.cookie = `user=ssd123; domain=unicode.compressibleflowcalculator.com; path=/Prod/api/v1/; SameSite=None; Secure`;
+            console.log("cookie set")
+            document.cookie = 'poop=pee; path="/saved;'
+            console.log(document.cookie)
+            */
+            
+            const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/saved`, {
+                credentials: 'include',
+                method: "GET",
+            })
             const data = await response.json()
             setSavedApplications(data)
         }
         fetchSavedApplications()
-    }, [])
+    }, [showModal])
+
+    if(showModal){
+        return (
+            <div>
+                <h2>Please enter your username</h2>
+                <input type="text" value={username||""} onChange={e => setUsername(e.target.value)} />
+                <button onClick={() => {
+                    localStorage.setItem('username', username||"");
+                    setShowModal(false);
+                }}>
+                    Submit
+                </button>
+         </div>
+        )
+    }
 
     return (
         <div>
