@@ -96,6 +96,7 @@ const Application = () => {
         console.log("Was Able To Fetch")
         console.log("String Analyzed")
         console.log(newStringAnalyzed)
+        console.log(data)
         setStringAnalyzed(newStringAnalyzed)
     }
     
