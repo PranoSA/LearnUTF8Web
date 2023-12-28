@@ -303,6 +303,7 @@ const Application = () => {
 
                 <div className="flex w-full border border-blue-600" >
                     {analyzedString.addUps.map((addup, pos) => {
+                        console.log("Got To Analyze" + pos)
                     return (
                         <div className='flex flex-wrap w-full md:w-1/2 border border-green-500 justify-right p-4' key={addup.accumulation_hex}>
                             <div className='w-full'> Byte # {pos} </div>
@@ -507,6 +508,7 @@ const Application = () => {
                                 <input className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/4" type="text" value={conversion.value} onChange={(e) => handleTextInputChange(e,index)} />
                             </div>
                             {stringAnalyzed[index].map((stringAnalyzed2, code_point) => {
+                                console.log(`Got String ANalyzed ${index}`)
                                 //Analyze Panel, Displaying the stringAnalyzed
                                 //And A button that changes the state by incrementing the Unicode Value 
                                 //This function gets iterates through the lsit of codepoints in stringAnalyzed
@@ -535,6 +537,9 @@ const Application = () => {
     }
 
     
+    console.log("THe Lenghts")
+    console.log(application?.conversions.length)
+    console.log(stringAnalyzed.length)
 
     //Display Application Display + Save Button Styled With Tailwind CSS
     return (
