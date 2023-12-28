@@ -35,6 +35,8 @@ const Application = () => {
     const [showModal, setShowModal] = useState<boolean>(false)
     const [username, setUsername] = useState<string|null>(localStorage.getItem('username'))
 
+    const [ready, setReady] = useState<boolean>(false)
+
     /*
     Add Functionality to be able to share the entire application state in a query string
     Also Modify the query string in the URL when the application state changes
@@ -97,6 +99,7 @@ const Application = () => {
         console.log("String Analyzed")
         console.log(newStringAnalyzed)
         console.log(data)
+        setReady(true)
         setStringAnalyzed(newStringAnalyzed)
     }
     
@@ -162,6 +165,7 @@ const Application = () => {
             
             console.log(newApplication.conversions)
             console.log(searchParams.get("conversions"))
+            setReady(true)
         }
 
             asyncInitFunction()
@@ -172,7 +176,7 @@ const Application = () => {
 
     
 
-    useEffect(() => {
+    /*useEffect(() => {
         const fetchApplication = async () => {
             if(application?.appid === undefined) return
             
@@ -188,7 +192,7 @@ const Application = () => {
                     console.log(e)
                 }
         }
-    }, [applicationId])
+    }, [applicationId])*/
 
     useEffect(() => {
         /*if (scrollRef.current) {
@@ -203,6 +207,10 @@ const Application = () => {
     }, [stringAnalyzed, application]);
 
     if(!application){
+        return <div> </div>
+    }
+    
+    if(!ready){
         return <div> </div>
     }
 
