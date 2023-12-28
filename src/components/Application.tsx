@@ -93,6 +93,7 @@ const Application = () => {
         let newStringAnalyzed = [] as Utf8Examination[][]
 
         newStringAnalyzed = await Promise.all(promises)
+        console.log("Was Able To Fetch")
         console.log("String Analyzed")
         console.log(newStringAnalyzed)
         setStringAnalyzed(newStringAnalyzed)
@@ -146,6 +147,7 @@ const Application = () => {
                     newStringAnalyzed = await Promise.all(promises)
                     console.log("String Analyzed")
                     console.log(newStringAnalyzed)
+
                 }
             }
             catch(e){
