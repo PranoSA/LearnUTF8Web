@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-const base_url_api = "https://codepoints.net/api/v1/codepoint/";
+const base_url_api = `${import.meta.env.VITE_REACT_APP_API_URL}/unicode/`;
 
 import { Buffer } from "buffer";
 
@@ -203,12 +203,14 @@ async function analyzeUtf8String(buffer:Buffer) :Promise<Utf8Examination[]> {
 
       
       try{
-      const res = await fetch(base_url_api + codePoint.toString(16));
-
+      //const res = await fetch(base_url_api + codePoint.toString(16));
+      //The Actual Character
+      const res = await fetch(base_url_api + String.fromCodePoint(codePoint))
 
       const body = await res.json();
 
-      characterName = body.na;
+      //characterName = body.na;
+        characterName = body.unicode_name;
 
       }catch(e){
         console.error(e)
