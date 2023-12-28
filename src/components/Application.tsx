@@ -478,7 +478,7 @@ const Application = () => {
                 return (
                     <div>
                         <h2>Please enter your username</h2>
-                        <input type="text" value={username||""} onChange={e => setUsername(e.target.value)} />
+                        <input type="text" value={username||""} className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/4" onChange={e => setUsername(e.target.value)} />
                         <button onClick={() => {
                             localStorage.setItem('username', username||"");
                             setShowModal(false);
@@ -496,11 +496,11 @@ const Application = () => {
                 <div className='w-full'>
                     <h1 > Application Details: </h1>
 
-                    <input type="text"  value={application.name} onChange={e => setApplication({...application, name:e.target.value})} />
-                    <input type="text" value={application.description} onChange={e => setApplication({...application, description:e.target.value})}/>
-                    <input type="text" value={application.created_at} onChange={e => setApplication({...application, created_at:e.target.value})} />
-                    <input type="text" value={application.updated_at} onChange={e => setApplication({...application, updated_at:e.target.value})}/>
-                    <input type="text" value={application.appid} onChange={e => setApplication({...application, appid:e.target.value})} />
+                    <input type="text"  className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5" value={application.name} onChange={e => setApplication({...application, name:e.target.value})} />
+                    <input type="text" className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5" value={application.description} onChange={e => setApplication({...application, description:e.target.value})}/>
+                    <input type="text" className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5" value={application.created_at} onChange={e => setApplication({...application, created_at:e.target.value})} />
+                    <input type="text" className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5" value={application.updated_at} onChange={e => setApplication({...application, updated_at:e.target.value})}/>
+                    <input type="text" className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5" value={application.appid} onChange={e => setApplication({...application, appid:e.target.value})} />
 
                 </div>
 
