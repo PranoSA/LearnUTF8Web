@@ -6,6 +6,7 @@ import { analyzeUtf8String, Utf8Examination } from './utf8'
 import {Buffer} from 'buffer';
 
 
+
 type ApplicationType = {
     appid : string
     name : string 
@@ -70,13 +71,63 @@ const Application = () => {
         }
     }, [application])
 
+    const fetchApplication = async () => {
+        //console.log(application?.appid)
+        //if(application?.appid === undefined) return
+        
+        const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/application/${applicationId}`)
+        if(!response.ok){
+            console.log("Faild TO Fetch")
+            throw new Error("No Data")
+            
+        }
+        const data = await response.json()
+        setApplication(data)
+
+
+
+        const promises = data.conversions.map(async (conversion:enumeratedConversion) => {
+            return analyzeUtf8String(Buffer.from(conversion.value))
+        })
+
+        let newStringAnalyzed = [] as Utf8Examination[][]
+
+        newStringAnalyzed = await Promise.all(promises)
+        console.log("String Analyzed")
+        console.log(newStringAnalyzed)
+        setStringAnalyzed(newStringAnalyzed)
+    }
+    
+
     useEffect(() => {
+
 
         const asyncInitFunction = async () => {
             console.log("In The Init")
             console.log(searchParams.get('name'))
-        
+
+            console.log(applicationId)
+
+
+
+            if(applicationId != null){
+                try {
+                    console.log("Start Fetch")
+                    await fetchApplication()
+                     return 
+                    }
+                    catch(e){
+                        console.log(e)
+                    }
+
+            }
+
+            
+
+            
             //On Mount, Set all the Application Properties from the Query Parameters
+
+
             const newApplication = {...application}
             newApplication.appid = searchParams.get("appid") || ""
             newApplication.name = searchParams.get("name") || ""
@@ -84,6 +135,7 @@ const Application = () => {
             newApplication.updated_at = searchParams.get("updated_at") || ""
             newApplication.description = searchParams.get("description") || ""
             let newStringAnalyzed = [] as Utf8Examination[][]
+
             try {
             newApplication.conversions = JSON.parse(decodeURIComponent(searchParams.get("conversions") || "[]")) 
                 //On Mount, Set all the String Analyzed Properties from the Query Parameters
