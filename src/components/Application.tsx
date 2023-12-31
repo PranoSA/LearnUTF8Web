@@ -194,7 +194,7 @@ const Application = () => {
         if(application == null) return 
         const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/application`, {
             method: 'POST',
-            credentials: 'include',
+            credentials: 'same-origin',
             headers: {
                 'Content-Type': 'application/json',
             },
