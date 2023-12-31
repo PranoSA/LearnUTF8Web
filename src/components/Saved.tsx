@@ -55,6 +55,10 @@ const Saved = () => {
                     method: "GET",
                 })
                 const data = await response.json()
+                if(!response.ok){
+                    setSavedApplications([])
+                    return 
+                }
                 setSavedApplications(data)
             }
             catch (error) {
