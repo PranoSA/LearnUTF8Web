@@ -49,20 +49,25 @@ const Saved = () => {
             document.cookie = 'poop=pee; path="/saved;'
             console.log(document.cookie)
             */
-            
-            const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/saved`, {
-                credentials: 'include',
-                method: "GET",
-            })
-            const data = await response.json()
-            setSavedApplications(data)
+            try {
+                const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/saved`, {
+                    credentials: 'include',
+                    method: "GET",
+                })
+                const data = await response.json()
+                setSavedApplications(data)
+            }
+            catch (error) {
+                setSavedApplications([])
+            }
         }
+
         fetchSavedApplications()
     }, [showModal])
 
     if(showModal){
         return (
-            <div>
+            <div className="flex flex-wrap">
                 <h2>Please enter your username</h2>
                 <input type="text" value={username||""} onChange={e => setUsername(e.target.value)} />
                 <button onClick={() => {
@@ -76,15 +81,17 @@ const Saved = () => {
     }
 
     return (
-        <div>
+        <div className="flex flex-wrap">  
             <h1>Saved Applications</h1>
             <ul>
                 {savedApplications.map((savedApplication) => (
-                    <li key={savedApplication.appid}>
-                        <Link to={`/home/${savedApplication.appid}`}>
-                            {savedApplication.name}
-                        </Link>
-                    </li>
+                    <div className="flex justify-center p-10 " >
+                        <li key={savedApplication.appid}>
+                            <Link to={`/home/${savedApplication.appid}`}>
+                                {savedApplication.name}
+                            </Link>
+                        </li>
+                    </div>
                 ))}
             </ul>
         </div>

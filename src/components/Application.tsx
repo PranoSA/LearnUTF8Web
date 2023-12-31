@@ -95,10 +95,6 @@ const Application = () => {
         let newStringAnalyzed = [] as Utf8Examination[][]
 
         newStringAnalyzed = await Promise.all(promises)
-        console.log("Was Able To Fetch")
-        console.log("String Analyzed")
-        console.log(newStringAnalyzed)
-        console.log(data)
         setReady(true)
         setStringAnalyzed(newStringAnalyzed)
     }
@@ -108,12 +104,6 @@ const Application = () => {
 
 
         const asyncInitFunction = async () => {
-            console.log("In The Init")
-            console.log(searchParams.get('name'))
-
-            console.log(applicationId)
-
-
 
             if(applicationId != null){
                 try {
@@ -149,8 +139,6 @@ const Application = () => {
                         return analyzeUtf8String(Buffer.from(conversion.value))
                     })
                     newStringAnalyzed = await Promise.all(promises)
-                    console.log("String Analyzed")
-                    console.log(newStringAnalyzed)
 
                 }
             }
@@ -158,13 +146,9 @@ const Application = () => {
                 console.log(e)
             }
             newApplication.conversions = newApplication.conversions || []
-            console.log("Loaded Application")
             setApplication(newApplication as ApplicationType)
-            console.log(setStringAnalyzed)
             setStringAnalyzed(newStringAnalyzed)
             
-            console.log(newApplication.conversions)
-            console.log(searchParams.get("conversions"))
             setReady(true)
         }
 
@@ -175,25 +159,6 @@ const Application = () => {
     ,[])
 
     
-
-    /*useEffect(() => {
-        const fetchApplication = async () => {
-            if(application?.appid === undefined) return
-            
-            const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/application/${application.appid}`)
-            const data = await response.json()
-            setApplication(data)
-        }
-        if(applicationId){
-                try {
-                fetchApplication()
-                }
-                catch(e){
-                    console.log(e)
-                }
-        }
-    }, [applicationId])*/
-
     useEffect(() => {
         /*if (scrollRef.current) {
             scrollRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -317,8 +282,8 @@ const Application = () => {
                             <div className='w-full'> Byte # {pos} </div>
                             <div className = 'w-full'> Hex Representation : 0x{addup.byte_hex} </div>
                             <div className='w-full'> Binary Representation : 0b{addup.byte_bin} </div>
-                            <div className='w-full'> Decimal Byte Value : {addup.result} </div>
                             <div className='w-full'> Encoding Bits : {addup.byte_mask} </div>
+                            <div className='w-full'> Decimal Byte Value : {addup.result} </div>
                             <div className='w-full'> Value : {addup.value} </div>
                             <div className='w-full'> Multiplier : 2^{Math.log2(addup.multiplier)} ({addup.multiplier}) </div>
                             <div className='w-full'> Calculated Value : (Value*Multiplier) </div>
@@ -494,14 +459,29 @@ const Application = () => {
         return (
             <div className="flex flex-wrap space-y-12 w-full justify-around">  
                 <div className='w-full' key={"Application Information"}>
-                    <h1 > Application Details: </h1>
-
-                    <input type="text"  className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5" value={application.name} onChange={e => setApplication({...application, name:e.target.value})} />
-                    <input type="text" className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5" value={application.description} onChange={e => setApplication({...application, description:e.target.value})}/>
-                    <input type="text" className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5" value={application.created_at} onChange={e => setApplication({...application, created_at:e.target.value})} />
-                    <input type="text" className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5" value={application.updated_at} onChange={e => setApplication({...application, updated_at:e.target.value})}/>
-                    <input type="text" className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5" value={application.appid} onChange={e => setApplication({...application, appid:e.target.value})} />
-
+                    <h1  className='py-5'> Application Details: </h1>
+                    <div className="flex flex-col space-y-4 items-center w-full">
+        <label className="flex justify-start w-full">
+           <div className='w-1/5'> Name </div>
+            <input type="text" className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5 ml-2" value={application.name} onChange={e => setApplication({...application, name:e.target.value})} />
+        </label>
+        <label className="flex justify-start w-full">
+        <div className='w-1/5'> Description </div>
+            <input type="text" className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5 ml-2" value={application.description} onChange={e => setApplication({...application, description:e.target.value})}/>
+        </label>
+        <label className="flex justify-start w-full">
+        <div className='w-1/5'>Created At </div>
+            <input type="text" className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5 ml-2" value={application.created_at} onChange={e => setApplication({...application, created_at:e.target.value})} />
+        </label>
+        <label className="flex justify-start w-full">
+        <div className='w-1/5'> Updated At </div>
+            <input type="text" className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5 ml-2" value={application.updated_at} onChange={e => setApplication({...application, updated_at:e.target.value})}/>
+        </label>
+        <label className="flex justify-start w-full">
+        <div className='w-1/5'> Application ID </div>
+            <input type="text" className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5 ml-2" value={application.appid} onChange={e => setApplication({...application, appid:e.target.value})} />
+        </label>
+    </div>
                 </div>
 
                 <div className='w-full'> -------------------------------------------------------------------------------------------------------------------------------</div>
@@ -513,10 +493,12 @@ const Application = () => {
                     return (
                         <div className="flex flex-wrap justify-around w-full" key={"Application" + index}> 
                             <div className='w-full flex justify-center p-20 '>
+                                <label className="flex justify-center w-full">
+                                    <div className='w-1/7 pr-10'> String {index +1} :</div>
                                 <input className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/4" type="text" value={conversion.value} onChange={(e) => handleTextInputChange(e,index)} />
+                                </label>
                             </div>
                             {stringAnalyzed[index].map((stringAnalyzed2, code_point) => {
-                                console.log(`Got String ANalyzed ${index}`)
                                 //Analyze Panel, Displaying the stringAnalyzed
                                 //And A button that changes the state by incrementing the Unicode Value 
                                 //This function gets iterates through the lsit of codepoints in stringAnalyzed
@@ -554,7 +536,7 @@ const Application = () => {
         <div className='flex flex-wrap justify-center'>
             <div className='w-full p-20'> 
                 <Link to="/saved">
-                    <button>View Saved</button>
+                    <button className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/4 my-2 border-gray-200">View Saved</button>
                 </Link>
             </div> 
             <div className='flex pt-20 pb-45 w-full justify-center'>
@@ -565,24 +547,6 @@ const Application = () => {
             </div>
         </div>
     )
-
-    /*return (
-<div className="flex  flex-wrap justify-evenly">
-  <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/3 p-4 ">
-    STAY AWAY
-  </div>
-  <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/3 p-4">
-      STAY AWAY
-  </div>
-  <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/3 p-4">
-      STAY AWAY
-  </div>
-  <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/3 p-4">s
-      STAY AWAY
-  </div>
-</div>
-    )*/
-    
 
 }
 
