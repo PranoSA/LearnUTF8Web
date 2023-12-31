@@ -493,7 +493,7 @@ const Application = () => {
 
         return (
             <div className="flex flex-wrap space-y-12 w-full justify-around">  
-                <div className='w-full'>
+                <div className='w-full' key={"Application Information"}>
                     <h1 > Application Details: </h1>
 
                     <input type="text"  className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5" value={application.name} onChange={e => setApplication({...application, name:e.target.value})} />
@@ -511,7 +511,7 @@ const Application = () => {
                 
                 {application.conversions.map((conversion, index) => {
                     return (
-                        <div className="flex flex-wrap justify-around w-full"> 
+                        <div className="flex flex-wrap justify-around w-full" key={"Application" + index}> 
                             <div className='w-full flex justify-center p-20 '>
                                 <input className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/4" type="text" value={conversion.value} onChange={(e) => handleTextInputChange(e,index)} />
                             </div>
@@ -561,7 +561,7 @@ const Application = () => {
                 <button className="bg-blue-400 text-white px-4 py-2 rounded" onClick={() => saveApplication()}>Save</button>
             </div>
             <div className='flex w-full pl-60 '>
-                <ApplicationDisplay />
+                {ApplicationDisplay()}
             </div>
         </div>
     )
