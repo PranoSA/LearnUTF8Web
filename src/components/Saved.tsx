@@ -43,12 +43,7 @@ const Saved = () => {
             if(username === null){
                 setUsername('ssd123')
             }
-            /*
-            document.cookie = `user=ssd123; domain=unicode.compressibleflowcalculator.com; path=/Prod/api/v1/; SameSite=None; Secure`;
-            console.log("cookie set")
-            document.cookie = 'poop=pee; path="/saved;'
-            console.log(document.cookie)
-            */
+
             try {
                 const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/saved`, {
                     credentials: 'include',
