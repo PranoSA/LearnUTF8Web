@@ -189,9 +189,10 @@ const Application = () => {
             return
         }
 
-        document.cookie = `user=${username}`;
+        document.cookie = `user=${username};Path=/`;
         
         if(application == null) return 
+        console.log(application)
         const response = await fetch(`${import.meta.env.VITE_REACT_APP_API_URL}/application`, {
             method: 'POST',
             credentials: 'same-origin',
@@ -261,7 +262,7 @@ const Application = () => {
         }
 
         return (
-            <div className='flex flex-wrap md:w-full border border-red-500 ' key={analyzedString.characterString}>
+            <div className='flex flex-wrap w-full ' key={analyzedString.characterString}>
                 <div className='w-full'>Grapheme # : {analyzedString.grapheme}</div>
                 <div className='w-full'>
                     Code point at Position {analyzedString.position} : U+{analyzedString.codePoint}
@@ -272,15 +273,14 @@ const Application = () => {
                     <div className='w-1/2'>textRepresentation : {analyzedString.characterString}</div>
                     <div className='w-1/2'>Name: {analyzedString.characterName}</div>
                     <div className='w-1/2'>Raw Hex Representation: 0x{analyzedString.hexRepresentation}</div>
-                    </div>
-                <div className='py-5 w-full t-5'></div>
+                </div>
+                <div className='py-5 w-full'></div>
 
-                <div className="flex w-full border border-blue-600" >
+                <div className="flex w-full border border-blue-600 flex-wrap" >
                     {analyzedString.addUps.map((addup, pos) => {
-                        console.log("Got To Analyze" + pos)
                     return (
-                        <div className='flex flex-wrap w-full md:w-1/2 border border-green-500 justify-right p-4' key={addup.accumulation_hex}>
-                            <div className='w-full'> Byte # {pos} </div>
+                        <div className='flex flex-wrap w-full md:w-1/2 lg:w-1/4 border border-green-500 pb-5 justify-right' key={addup.accumulation_hex}>
+                            <div className='w-full'> Byte # {pos+1} </div>
                             <div className = 'w-full'> Hex Representation : 0x{addup.byte_hex} </div>
                             <div className='w-full'> Binary Representation : 0b{addup.byte_bin} </div>
                             <div className='w-full'> Encoding Bits : {addup.byte_mask} </div>
@@ -294,8 +294,8 @@ const Application = () => {
                             <div className='w-full'> Dec - {(addup.accumulation_dec)}</div>
                             <div className = "w-full"> Hex - 0x{(addup.accumulation_hex)}</div>
                             <div className="w-full flex justify-around">
-                            <button className='bg-blue-500 p-5 text-white px-4 ' onClick={() => changeByte( index, pos, true)}>Increment Byte</button>
-                            <button className='bg-red-500 p-5 text-white px-4' onClick={() => changeByte( index, pos, false)}>Decrement Byte</button>
+                            <button className='bg-blue-500 p-2 text-white px-4 py-4 text-sm ' onClick={() => changeByte( index, pos, true)}>Increment Byte</button>
+                            <button className='bg-red-500 p-2 text-white px-4 py-4 text-sm' onClick={() => changeByte( index, pos, false)}>Decrement Byte</button>
                             </div>
                         </div>
                     )
@@ -485,8 +485,6 @@ const Application = () => {
     </div>
                 </div>
 
-                <div className='w-full'> -------------------------------------------------------------------------------------------------------------------------------</div>
-
                 <div className='w-full '>
                 
                 
@@ -527,23 +525,19 @@ const Application = () => {
         
     }
 
-    
-    console.log("THe Lenghts")
-    console.log(application?.conversions.length)
-    console.log(stringAnalyzed.length)
 
     //Display Application Display + Save Button Styled With Tailwind CSS
     return (
         <div className='flex flex-wrap justify-center'>
-            <div className='w-full p-20'> 
+            <div className='w-full flex justify-center'> 
                 <Link to="/saved">
-                    <button className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/4 my-2 border-gray-200">View Saved</button>
+                    <button className="ring-2 ring-blue-500 focus:ring-blue-700 sm:w-1/2 my-2 border-gray-200">View Saved</button>
                 </Link>
             </div> 
             <div className='flex pt-20 pb-45 w-full justify-center'>
                 <button className="bg-blue-400 text-white px-4 py-2 rounded" onClick={() => saveApplication()}>Save</button>
             </div>
-            <div className='flex w-full pl-60 '>
+            <div className='flex w-full justify-center pl-4 '>
                 {ApplicationDisplay()}
             </div>
         </div>
