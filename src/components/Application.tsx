@@ -32,6 +32,8 @@ const Application = () => {
     const [searchParams] = useSearchParams();
     const scrollRef = useRef<HTMLElement | null>(null);
 
+    //const [authenticatedUser, isAuthenticatedUser] = useState<boolean>(isAuthenticatedUser());
+
     const [showModal, setShowModal] = useState<boolean>(false)
     const [username, setUsername] = useState<string|null>(localStorage.getItem('username'))
 
@@ -525,13 +527,29 @@ const Application = () => {
         
     }
 
+    const IsAuthenticatedDisplay = () => {
+        return (
+            <div className='w-full flex justify-center'>
+                <h1 className='text-2xl font-bold'>Authenticated as {document.cookie.split('user=')[1].split(';')[0] }</h1>
+            </div>
+        );
+    }
+
+
+    const CheckAuthenticated =():boolean => {
+        if(document.cookie.split('user=').length < 2) return false;
+        if(document.cookie.split('user=')[1] == "") return false;
+
+        return true
+    }
 
     //Display Application Display + Save Button Styled With Tailwind CSS
     return (
         <div className='flex flex-wrap justify-center'>
+            {CheckAuthenticated()? IsAuthenticatedDisplay(): <div></div>}
             <div className='w-full flex justify-center'> 
                 <Link to="/saved">
-                    <button className="ring-2 ring-blue-500 focus:ring-blue-700 sm:w-1/2 my-2 border-gray-200">View Saved</button>
+                    <button className="bg-red-400 text-white px-4 py-2 rounded">View Saved</button>
                 </Link>
             </div> 
             <div className='flex pt-20 pb-45 w-full justify-center'>
