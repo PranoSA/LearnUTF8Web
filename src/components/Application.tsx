@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { useEffect, useRef, useState } from 'react'
+import React, { MouseEvent, useEffect, useRef, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { analyzeUtf8String, Utf8Examination } from './utf8'
 import {Buffer} from 'buffer';
+import {analyzeUtf16String, Utf16Examination} from './utf16'
 
 
 
@@ -39,6 +40,19 @@ const Application = () => {
 
     const [ready, setReady] = useState<boolean>(false)
 
+
+    const lastElementRef = useRef<HTMLElement|null>(null);
+
+    const [utfVersion, utfVersionSet] = useState<string>("utf8")
+
+    const [stringAnalyzed16, setStringAnalyzed16] = useState<Utf16Examination [][]>([])
+
+
+    const swapUtfVersion = (s:string) => {
+
+        utfVersionSet(s)
+    }
+
     /*
     Add Functionality to be able to share the entire application state in a query string
     Also Modify the query string in the URL when the application state changes
@@ -53,8 +67,6 @@ const Application = () => {
     
     //On Load, Load the Application State from the Query Parameters
     useEffect(() => {
-        console.log("In The Set")
-        console.log(application)
         if(!application) return 
         //searchParams.set("appid", applicationId || "")
         //Set searchParams for all application properties
@@ -63,14 +75,10 @@ const Application = () => {
         searchParams.set("updated_at", application?.updated_at || "")
         searchParams.set("description", application?.description || "")
         searchParams.set("conversions",(JSON.stringify(application?.conversions))|| "")
-         console.log(searchParams.get('conversions'))
-         console.log(JSON.parse(decodeURIComponent(searchParams.get('conversions') || "[]")))
+
         window.history.pushState({}, '', '?' + searchParams.toString());
-        console.log(application);
-        console.log(stringAnalyzed)
+
         if (scrollRef.current) {
-            console.log("Scroll Ref")
-            console.log(scrollRef.current)
             scrollRef.current.focus();
         }
     }, [application])
@@ -167,8 +175,7 @@ const Application = () => {
             scrollRef.current = null;
         }*/
         if (scrollRef.current) {
-            console.log("Scroll Ref")
-            console.log(scrollRef.current)
+
             scrollRef.current.focus();
         }
     }, [stringAnalyzed, application]);
@@ -246,9 +253,9 @@ const Application = () => {
 
             Add a Button That Ups the U+ Value For that codepoint instead of the byte 
         */
+        
 
-
-        const changeByte =  async ( index:number,pos:number, increment:boolean) => {
+        const changeByte =  async ( e:React.MouseEvent<HTMLButtonElement>,  index:number,pos:number, increment:boolean) => {
                                 
             const newApplication = {...application}
             //How To Decrement The Value
@@ -261,6 +268,8 @@ const Application = () => {
             const newState = await analyzeUtf8String(currentBytes)
             //Only Change This Index in the derivedState
             setStringAnalyzed([...stringAnalyzed.slice(0,index), newState,...stringAnalyzed.slice(index+1) ])
+
+            lastElementRef.current = e.target as HTMLElement;
         }
 
         return (
@@ -296,8 +305,8 @@ const Application = () => {
                             <div className='w-full'> Dec - {(addup.accumulation_dec)}</div>
                             <div className = "w-full"> Hex - 0x{(addup.accumulation_hex)}</div>
                             <div className="w-full flex justify-around">
-                            <button className='bg-blue-500 p-2 text-white px-4 py-4 text-sm ' onClick={() => changeByte( index, pos, true)}>Increment Byte</button>
-                            <button className='bg-red-500 p-2 text-white px-4 py-4 text-sm' onClick={() => changeByte( index, pos, false)}>Decrement Byte</button>
+                            <button className='bg-blue-500 p-2 text-white px-4 py-4 text-sm ' onClick={(e) => changeByte(e, index, pos, true)}>Increment Byte</button>
+                            <button className='bg-red-500 p-2 text-white px-4 py-4 text-sm' onClick={(e) => changeByte( e,index, pos, false)}>Decrement Byte</button>
                             </div>
                         </div>
                     )
@@ -323,6 +332,95 @@ const Application = () => {
         )
     }
 
+        //Add A Prop That is a function that can be called to modify the the conversion value
+    //For that conversion, then call the function with the new value
+    //from the increment and decrement functionality
+    const AnalyzePanelUTF16 =  (analyzedString:Utf16Examination, index:number) => {
+
+            
+        /*
+            Flex Size = 4 in Large, 6 in Medium, 12 in Small
+            Space Around = Max
+            Space Between = Max
+            Align Items = Center
+            Justify Content = Center
+            Direction = Row
+            Wrap = noWrap 
+
+        */
+
+        /*
+            Display 
+            Code point at Position 0: Code Point
+            Number of Bytes : numBytes
+            Grapheme #: Grapheme
+            textRepresentation : chracterRepresentation
+            Name: characterName
+            Raw Hex Representation: hexRepresentation
+            
+            for each    addUp : addUps
+                byte_hex : byte_bin
+                byte_dec(byte_mask) * multiplier = result 
+                Calculated Decimal Value = result_hexadecimal
+
+
+            Add a button that decrements the position by 1 and displays the new analyzedString
+            Add a button that increments the position by 1 and displays the new analyzedString
+
+            You would need to reanalyze the string to get the new analyzedString
+
+            Add a Button That Ups the U+ Value For that codepoint instead of the byte 
+        */
+        
+
+        const changeByte =  async ( e:React.MouseEvent<HTMLButtonElement>,  index:number,pos:number, increment:boolean) => {
+                                
+
+            lastElementRef.current = e.target as HTMLElement;
+        }
+
+        return (
+            <div className='flex flex-wrap w-full ' key={analyzedString.characterString}>
+                <div className='w-full'>Grapheme # : {analyzedString.grapheme}</div>
+                <div className='w-full'>
+                    Code point at Position {analyzedString.position} : U+{analyzedString.codePoint}
+                </div>
+                    <div className="w-full">
+                    <div className='w-1/2'> Number of Bytes : {analyzedString.numBytes}</div>
+
+                    <div className='w-1/2'>textRepresentation : {analyzedString.characterString}</div>
+                    <div className='w-1/2'>Name: {analyzedString.characterName}</div>
+                    <div className='w-1/2'>Raw Hex Representation: 0x{analyzedString.hexRepresentation}</div>
+                </div>
+                <div className='py-5 w-full'></div>
+
+                <div className="flex w-full border border-blue-600 flex-wrap" >
+                {analyzedString.addUps.map((addup, pos) => {
+                    return (
+                    <div className='flex flex-wrap w-full md:w-1/2 lg:w-1/4 border border-green-500 pb-5 justify-right' key={addup.accumulation_hex}>
+                        <div className='w-full'> Code Point # {pos+1} </div>
+                        <div className = 'w-full'> Hex Representation : 0x{addup.two_byte_hex} </div>
+                        <div className='w-full'> Binary Representation : 0b{addup.two_byte_bin} </div>
+                        <div className='w-full'> Encoding Bits : {addup.surrogate_mask} </div>
+                        <div className='w-full'> Decimal Byte Value : {addup.result} </div>
+                        <div className='w-full'> Value : {addup.value} </div>
+                        <div className='w-full'> Multiplier : 2^{Math.log2(addup.multiplier)} ({addup.multiplier}) </div>
+                        <div className='w-full'> Calculated Value : (Value*Multiplier) </div>
+                        <div className='w-full'> Dec : {addup.multiplier*addup.value} </div>
+                        <div className="w-full"> Hex : 0x{(addup.multiplier*addup.value).toString(16)}</div>
+                        <div className='w-full'> Accumulation Value : </div>
+                        <div className='w-full'> Dec - {(addup.accumulation_dec)}</div>
+                        <div className = "w-full"> Hex - 0x{(addup.accumulation_hex)}</div>
+                        <div className="w-full flex justify-around">
+                        </div>    
+                    </div>
+                    )
+                })}
+
+                </div>
+            </div>
+        )
+    }
     
 
 
@@ -377,6 +475,8 @@ const Application = () => {
 
                 */
 
+        
+
         const handleTextInputChange = async (e:React.ChangeEvent<HTMLInputElement>, index:number) => {
                 const newApplication = {...application}
                 console.log(e.currentTarget)
@@ -386,7 +486,15 @@ const Application = () => {
                 setApplication(newApplication)
                 const newState = await analyzeUtf8String(Buffer.from(e.target.value))
                 setApplication(newApplication)
+                console.log("Input Change")
+                if(lastElementRef.current?.tagName == "BUTTON"){
+                    return;
+                }
+                console.log("Going Through");
                 setStringAnalyzed([...stringAnalyzed.slice(0,index), newState,...stringAnalyzed.slice(index+1)])  
+                setStringAnalyzed16([...stringAnalyzed16.slice(0,index), await analyzeUtf16String(Buffer.from(e.target.value, 'utf16le')),...stringAnalyzed16.slice(index+1)])
+                //lastElementRef.current = e.currentTarget
+                console.log(stringAnalyzed16);
         }
 
         const changeCodepoint = async (e:React.MouseEvent, index:number, code_point:number, increment:boolean) => {
@@ -418,6 +526,7 @@ const Application = () => {
                 setStringAnalyzed([...stringAnalyzed.slice(0,index), newState,...stringAnalyzed.slice(index+1) ])
                 
                 scrollRef.current = e.currentTarget as HTMLElement
+                lastElementRef.current = e.currentTarget as HTMLElement;
             }
 
             const initializeCodepoint = () => {
@@ -443,6 +552,30 @@ const Application = () => {
                                 value : 32,
                                 accumulation_hex : "20",
                                 accumulation_dec : "32",
+                            }
+                        ]
+                    }
+                ]])
+                setStringAnalyzed16([...stringAnalyzed16, [
+                    {
+                        position : 0,
+                        codePoint : "20",
+                        numBytes : 1,
+                        grapheme : 1,
+                        characterString : " ",
+                        characterName : "space",
+                        hexRepresentation : "0x20",
+                        addUps : [
+                            {
+                                two_byte_hex : "0x20",
+                                two_byte_bin : "00100000",
+                                surrogate_mask : "0000000000000000",
+                                value : 32,
+                                result : "32",
+                                multiplier : 1,
+                                accumulation_hex : "20",
+                                accumulation_dec : "32",
+                                surrogate_addup : 0,
                             }
                         ]
                     }
@@ -512,10 +645,10 @@ const Application = () => {
                             <div className='w-full flex justify-center p-20 '>
                                 <label className="flex justify-center w-full">
                                     <div className='w-1/7 pr-10'> String {index +1} :</div>
-                                <input className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/4" type="text" value={conversion.value} onChange={(e) => handleTextInputChange(e,index)} />
+                                <input className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/4" type="text" onClick = {(e) => lastElementRef.current = e.currentTarget } value={conversion.value} onChange={(e) => handleTextInputChange(e,index)} />
                                 </label>
                             </div>
-                            {stringAnalyzed[index].map((stringAnalyzed2, code_point) => {
+                            {utfVersion === 'utf-8' && stringAnalyzed[index].map((stringAnalyzed2, code_point) => {
                                 //Analyze Panel, Displaying the stringAnalyzed
                                 //And A button that changes the state by incrementing the Unicode Value 
                                 //This function gets iterates through the lsit of codepoints in stringAnalyzed
@@ -533,6 +666,21 @@ const Application = () => {
                                     </div>
                                 )
                             })}
+                            {utfVersion == 'utf-16' && stringAnalyzed16[index].map((stringAnalyzed2, code_point) => {
+                                        return (
+                                            <div className="flex flex-wrap items-center justify-around space-y-12 "key={stringAnalyzed2.characterString}>
+                                                <div className="flex border-t border-gray-200 my-2 w-full">----------------------------------------------------------</div>
+                                                <div className='w-1/2'>
+                                                    <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index, code_point, true)}>Increment Code Point</button>
+                                                </div>
+                                                <div className='w-1/2'>
+                                                    <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index,code_point, false)}>Decrement Code Point</button>
+                                                </div>
+                                                {AnalyzePanelUTF16(stringAnalyzed2, index)}
+                                            </div>
+                                        )
+                                    })}
+                            
                         </div>
                     )
                 })}
@@ -570,6 +718,26 @@ const Application = () => {
             </div> 
             <div className='flex pt-20 pb-45 w-full justify-center'>
                 <button className="bg-blue-400 text-white px-4 py-2 rounded" onClick={() => saveApplication()}>Save</button>
+            </div>
+            <div className='w-full flex justify-around'>
+            <button 
+                    className={`text-white px-4 py-2 rounded w-1/6 ${utfVersion === "utf-8" ? "bg-blue-600" : "bg-blue-400"}`} 
+                    onClick={() => swapUtfVersion("utf-8")}
+                >
+                    UTF-8
+                </button>
+                <button 
+                    className={`text-white px-4 py-2 rounded w-1/6 ${utfVersion === "utf-16" ? "bg-blue-600" : "bg-blue-400"}`} 
+                    onClick={() => swapUtfVersion("utf-16")}
+                >
+                    UTF-16
+                </button>
+                <button 
+                    className={`text-white px-4 py-2 rounded w-1/6 ${utfVersion === "utf-32" ? "bg-blue-600" : "bg-blue-400"}`} 
+                    onClick={() => swapUtfVersion("utf-32")}
+                >
+                    UTF-32
+                </button>
             </div>
             <div className='flex w-full justify-center pl-4 '>
                 {ApplicationDisplay()}
