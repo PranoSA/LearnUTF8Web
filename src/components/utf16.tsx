@@ -77,13 +77,13 @@ function analyzeCodePointByteArrayUtf16(byteArray: Buffer, codePoints:number):Ut
     if(codePoints == 1){
       return [{
         two_byte_hex : byteArray.toString('hex').padStart(4,'0'),
-        two_byte_bin :  byteArray[0].toString(2).padStart(8,'0')+byteArray[1].toString(2).padStart(8,'0'),
+        two_byte_bin :  byteArray[1].toString(2).padStart(8,'0')+byteArray[0].toString(2).padStart(8,'0'),
         surrogate_mask : '0000000000000000',
-        value : byteArray[0]*0x100 + byteArray[1],
-        result : (byteArray[0]*0x100 + byteArray[1]).toString(10),
+        value : byteArray[1]*0x100 + byteArray[0],
+        result : (byteArray[1]*0x100 + byteArray[0]).toString(10),
         multiplier : 1,
-        accumulation_hex :  (byteArray[0]*0x100 + byteArray[1]).toString(16),
-        accumulation_dec :  (byteArray[0]*0x100 + byteArray[1]).toString(10),
+        accumulation_hex :  (byteArray[1]*0x100 + byteArray[0]).toString(16),
+        accumulation_dec :  (byteArray[1]*0x100 + byteArray[0]).toString(10),
         surrogate_addup : 0
       }]
       
@@ -94,15 +94,15 @@ function analyzeCodePointByteArrayUtf16(byteArray: Buffer, codePoints:number):Ut
       //Apply The Mask Really
 
       // Remove the Surrogate Mask, only encode 10 bits
-      const first_surrogate_value = (0x3 * byteArray[0])*0x100 + byteArray[1]
-      const second_surrogate_value = (0x3 * byteArray[2])*0x100 + byteArray[3]
+      const first_surrogate_value = (0x3 * byteArray[3])*0x100 + byteArray[2]
+      const second_surrogate_value = (0x3 * byteArray[1])*0x100 + byteArray[0]
       const multiplier = 0x400 // 2^10 = 1024
       // Also, Add 2^16 to the total value at the end to get the actual code point
 
       // Not Sure How I should ressemble the 2^16 in the addup array
       return [{
           two_byte_hex : byteArray.toString('hex').padStart(4,'0'),
-          two_byte_bin :  byteArray[0].toString(2).padStart(8,'0')+byteArray[1].toString(2).padStart(8,'0'),
+          two_byte_bin :  byteArray[3].toString(2).padStart(8,'0')+byteArray[2].toString(2).padStart(8,'0'),
           surrogate_mask : 'xxxxxx0000000000',
           value : first_surrogate_value,
           result : (first_surrogate_value*0x400).toString(10),
@@ -112,7 +112,7 @@ function analyzeCodePointByteArrayUtf16(byteArray: Buffer, codePoints:number):Ut
           surrogate_addup : 0
       }, {
         two_byte_hex : byteArray.toString('hex').padStart(4,'0'),
-        two_byte_bin :  byteArray[2].toString(2).padStart(8,'0')+byteArray[3].toString(2).padStart(8,'0'),
+        two_byte_bin :  byteArray[1].toString(2).padStart(8,'0')+byteArray[0].toString(2).padStart(8,'0'),
         surrogate_mask : 'xxxxxx0000000000',
         value : second_surrogate_value,
         multiplier : 1,
