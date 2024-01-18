@@ -44,7 +44,7 @@ const Application = () => {
 
     const lastElementRef = useRef<HTMLElement|null>(null);
 
-    const [utfVersion, utfVersionSet] = useState<string>("utf8")
+    const [utfVersion, utfVersionSet] = useState<string>("utf-8")
 
     const [stringAnalyzed16, setStringAnalyzed16] = useState<Utf16Examination [][]>([])
 
@@ -815,19 +815,19 @@ const Application = () => {
             </div>
             <div className='w-full flex justify-around'>
             <button 
-                    className={`text-white px-4 py-2 rounded w-1/6 ${utfVersion === "utf-8" ? "bg-blue-600" : "bg-blue-400"}`} 
+                    className={`text-white px-4 py-2 rounded w-1/6 ${utfVersion === "utf-8" ? "bg-blue-600" : "bg-blue-200"}`} 
                     onClick={() => swapUtfVersion("utf-8")}
                 >
                     UTF-8
                 </button>
                 <button 
-                    className={`text-white px-4 py-2 rounded w-1/6 ${utfVersion === "utf-16" ? "bg-blue-600" : "bg-blue-400"}`} 
+                    className={`text-white px-4 py-2 rounded w-1/6 ${utfVersion === "utf-16" ? "bg-blue-600" : "bg-blue-200"}`} 
                     onClick={() => swapUtfVersion("utf-16")}
                 >
                     UTF-16
                 </button>
                 <button 
-                    className={`text-white px-4 py-2 rounded w-1/6 ${utfVersion === "utf-32" ? "bg-blue-600" : "bg-blue-400"}`} 
+                    className={`text-white px-4 py-2 rounded w-1/6 ${utfVersion === "utf-32" ? "bg-blue-600" : "bg-blue-200"}`} 
                     onClick={() => swapUtfVersion("utf-32")}
                 >
                     UTF-32
