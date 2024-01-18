@@ -11,7 +11,7 @@ import { Buffer } from "buffer";
     Represents the Maximum Value for the preceeding bytes of a 2 string UTF-8 sequence
 */
 
-const maxRepresentativeValues = [1, 0x40, 0x40*0x40, 0x40*0x40*0x40];
+
 
 type Utf8Examination = {
     position : number, 
@@ -70,13 +70,14 @@ type Utf16Examination = {
 function analyzeCodePointByteArrayUtf16(byteArray: Buffer, codePoints:number):Utf16Addup[]{
 
     // How Many Values
-    
-    const addUpResults : Utf16Addup[] = []
+
+    const newBuffer = Buffer.from(byteArray)
+    newBuffer.reverse()
 
 
     if(codePoints == 1){
       return [{
-        two_byte_hex : byteArray.toString('hex').padStart(4,'0'),
+        two_byte_hex : byteArray.slice(0,2).toString('hex').padStart(4,'0'),
         two_byte_bin :  byteArray[1].toString(2).padStart(8,'0')+byteArray[0].toString(2).padStart(8,'0'),
         surrogate_mask : '0000000000000000',
         value : byteArray[1]*0x100 + byteArray[0],
@@ -94,15 +95,20 @@ function analyzeCodePointByteArrayUtf16(byteArray: Buffer, codePoints:number):Ut
       //Apply The Mask Really
 
       // Remove the Surrogate Mask, only encode 10 bits
-      const first_surrogate_value = (0x3 * byteArray[3])*0x100 + byteArray[2]
-      const second_surrogate_value = (0x3 * byteArray[1])*0x100 + byteArray[0]
-      const multiplier = 0x400 // 2^10 = 1024
+
+
+
+      const first_surrogate_value = ((0x3 & byteArray[1])&0x3FF)*0x100 + byteArray[0] 
+
+      const second_surrogate_value = ((0x3 & byteArray[3])*0x100 + byteArray[2])
+      //const multiplier = 0x400 // 2^10 = 1024
       // Also, Add 2^16 to the total value at the end to get the actual code point
 
       // Not Sure How I should ressemble the 2^16 in the addup array
+      console.log(byteArray);
       return [{
-          two_byte_hex : byteArray.toString('hex').padStart(4,'0'),
-          two_byte_bin :  byteArray[3].toString(2).padStart(8,'0')+byteArray[2].toString(2).padStart(8,'0'),
+          two_byte_hex : byteArray.slice(1,2).toString('hex').padStart(2,'0') + byteArray.slice(0,1).toString('hex').padStart(2,'0'),
+          two_byte_bin :  byteArray[1].toString(2).padStart(8,'0')+byteArray[0].toString(2).padStart(8,'0'),
           surrogate_mask : 'xxxxxx0000000000',
           value : first_surrogate_value,
           result : (first_surrogate_value*0x400).toString(10),
@@ -111,14 +117,14 @@ function analyzeCodePointByteArrayUtf16(byteArray: Buffer, codePoints:number):Ut
           accumulation_dec :  (first_surrogate_value*0x400).toString(10),
           surrogate_addup : 0
       }, {
-        two_byte_hex : byteArray.toString('hex').padStart(4,'0'),
-        two_byte_bin :  byteArray[1].toString(2).padStart(8,'0')+byteArray[0].toString(2).padStart(8,'0'),
+        two_byte_hex : byteArray.slice(3,4).toString('hex').padStart(2,'0') + byteArray.slice(2,3).toString('hex').padStart(2,'0'),
+        two_byte_bin : byteArray[3].toString(2).padStart(8,'0')+byteArray[2].toString(2).padStart(8,'0'), 
         surrogate_mask : 'xxxxxx0000000000',
         value : second_surrogate_value,
         multiplier : 1,
         result : (second_surrogate_value).toString(10),
-        accumulation_hex :  (first_surrogate_value*0x400 + second_surrogate_value).toString(16),
-        accumulation_dec :  (first_surrogate_value*0x400 + second_surrogate_value).toString(10),
+        accumulation_hex :  (first_surrogate_value*0x400 + second_surrogate_value ).toString(16) + " + 0x10000 = " + (first_surrogate_value*0x400 + second_surrogate_value + 0x10000).toString(16),
+        accumulation_dec :  (first_surrogate_value*0x400 + second_surrogate_value ).toString(10) + "     (2^16 Offset)",
         surrogate_addup : 0x10000 // 2^16
       }]
     }
@@ -140,6 +146,7 @@ async function analyzeUtf16String(buffer:Buffer) :Promise<Utf16Examination[]> {
 
     let numTwoBytes = 1 ;
 
+    console.log(buffer.length)
     for (let i = 0; i < buffer.length;) {
         /**
         
@@ -152,21 +159,28 @@ async function analyzeUtf16String(buffer:Buffer) :Promise<Utf16Examination[]> {
       which_grapheme++
     
       // Get the first two bytes of the UTF-16 sequence
-      const firstTwoByte = [buffer[i], buffer[i+1]];
+      //const firstTwoByte = [buffer[i+3], buffer[i+2]];
 
      /*
       Check if First Bytes is part of surrogate pair
 
       First Byte is between 0xD800 and 0xDBFF
       */
-     const firstCodePointValue = firstTwoByte[0] * 0x100 + firstTwoByte[1]
+     const firstCodePointValue = buffer[i+1] * 0x100 + buffer[i]
+
+     console.log(buffer);
+
+     console.log(firstCodePointValue);  // 
 
      if(firstCodePointValue >= 0xD800 && firstCodePointValue <= 0xDBFF){
        numTwoBytes = 2
-
+        console.log(i)
        //Make Sure 2nd Of Pair si between 0xDC00 and 0xDFFF
-        const secondByte = [buffer[i+2], buffer[i+3]];
+        const secondByte = [buffer[i+3], buffer[i+2]];
         const secondByteValue = secondByte[0] * 0x100 + secondByte[1]
+
+        console.log(firstCodePointValue.toString(16))
+        console.log(secondByteValue.toString(16))
 
         if(!(secondByteValue >= 0xDC00 && secondByteValue <= 0xDFFF)){
           console.error(`Invalid UTF-16 sequence at position ${i}, not 2nd part of pair`);
@@ -199,12 +213,12 @@ async function analyzeUtf16String(buffer:Buffer) :Promise<Utf16Examination[]> {
       try{
       //const res = await fetch(base_url_api + codePoint.toString(16));
       //The Actual Character
-      const res = await fetch(base_url_api + String.fromCodePoint(codePoint))
+     const res = await fetch(base_url_api + String.fromCodePoint(codePoint))
 
       const body = await res.json();
 
-      //characterName = body.na;
-        characterName = body.unicode_name;
+      characterName = body.na;
+      //characterName = body.unicode_name;
 
       }catch(e){
         console.error(e)
@@ -215,8 +229,19 @@ async function analyzeUtf16String(buffer:Buffer) :Promise<Utf16Examination[]> {
 
       //console.log(`\t Raw Hexdecimal Representation: ${subArray.toString('hex').padStart(2*numBytes, '0')} \n`)
       //console.log("Byte By Byte Calculation")
+      const subArray : Buffer = Buffer.from([])
+      if(numTwoBytes == 2){
+        subArray[0] = buffer[i+1]
+        subArray[1] = buffer[i]
+        subArray[2] = buffer[i+3]
+        subArray[3] = buffer[i+2]
+      }
+      else{
+        subArray[0] = buffer[i+1]
+        subArray[1] = buffer[i]
+      }
 
-      const subArray = buffer.slice(i, i + 2*numTwoBytes);
+      //const subArray = buffer.slice(i, i + 2*numTwoBytes);
 
 
      examinations.push({
@@ -224,15 +249,19 @@ async function analyzeUtf16String(buffer:Buffer) :Promise<Utf16Examination[]> {
         numBytes: 2*numTwoBytes,
         grapheme: which_grapheme,
         codePoint: codePoint.toString(16),
-        characterName: characterName,
+        characterName,
         characterString: String.fromCodePoint(codePoint),
-        hexRepresentation: subArray.toString('hex').padStart(2*numTwoBytes, '0'),
-        addUps: analyzeCodePointByteArrayUtf16(subArray, numTwoBytes)
+        hexRepresentation:buffer.slice(i,i+2*numTwoBytes).toString('hex').padStart(2*numTwoBytes, '0'),
+        addUps: analyzeCodePointByteArrayUtf16(buffer.slice(i,i+2*numTwoBytes), numTwoBytes)
      })
 
-
+     console.log('i')
+     console.log(numTwoBytes)
       // Move to the next position in the Buffer
+      console.log(i)
       i += 2*numTwoBytes;
+
+      numTwoBytes = 1
     }
     
     

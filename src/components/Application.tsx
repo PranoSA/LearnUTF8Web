@@ -5,6 +5,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { analyzeUtf8String, Utf8Examination } from './utf8'
 import {Buffer} from 'buffer';
 import {analyzeUtf16String, Utf16Examination} from './utf16'
+import { Utf32Examination, analyzeUtf32String } from './utf32';
 
 
 
@@ -46,6 +47,8 @@ const Application = () => {
     const [utfVersion, utfVersionSet] = useState<string>("utf8")
 
     const [stringAnalyzed16, setStringAnalyzed16] = useState<Utf16Examination [][]>([])
+
+    const [stringAnalyzed32, setStringAnalyzed32] = useState<Utf32Examination [][]>([])
 
 
     const swapUtfVersion = (s:string) => {
@@ -421,6 +424,52 @@ const Application = () => {
             </div>
         )
     }
+
+    const analyzeUtf32Panel = (analyzedString:Utf32Examination) => {
+        
+        return     (
+            <div className='flex flex-wrap w-full ' key={analyzedString.characterString}>
+                <div className='w-full'>Grapheme # : {analyzedString.grapheme}</div>
+                <div className='w-full'>
+                    Code point at Position {analyzedString.position} : U+{analyzedString.codePoint}
+                </div>
+                    <div className="w-full">
+                    <div className='w-1/2'> Number of Bytes : {analyzedString.numBytes}</div>
+
+                    <div className='w-1/2'>textRepresentation : {analyzedString.characterString}</div>
+                    <div className='w-1/2'>Name: {analyzedString.characterName}</div>
+                    <div className='w-1/2'>Raw Hex Representation: 0x{analyzedString.hexRepresentation}</div>
+                </div>
+                <div className='py-5 w-full'></div>
+
+                <div className="flex w-full border border-blue-600 flex-wrap" >
+                {analyzedString.addUps.map((addup, pos) => {
+                    return (
+                    <div className='flex flex-wrap w-full md:w-1/2 lg:w-1/4 border border-green-500 pb-5 justify-right' key={addup.accumulation_hex}>
+                        <div className='w-full'> Code Point # {pos+1} </div>
+                        <div className = 'w-full'> Hex Representation : 0x{addup.two_byte_hex} </div>
+                        <div className='w-full'> Binary Representation : 0b{addup.two_byte_bin} </div>
+                        <div className='w-full'> Encoding Bits : {"".padStart(11,'x')+"".padStart(21,'0')} </div>
+                        <div className='w-full'> Decimal Byte Value : {addup.result} </div>
+                        <div className='w-full'> Value : {addup.value} </div>
+                        <div className='w-full'> Multiplier : 2^{Math.log2(addup.multiplier)} ({addup.multiplier}) </div>
+                        <div className='w-full'> Calculated Value : (Value*Multiplier) </div>
+                        <div className='w-full'> Dec : {addup.multiplier*addup.value} </div>
+                        <div className="w-full"> Hex : 0x{(addup.multiplier*addup.value).toString(16)}</div>
+                        <div className='w-full'> Accumulation Value : </div>
+                        <div className='w-full'> Dec - {(addup.accumulation_dec)}</div>
+                        <div className = "w-full"> Hex - 0x{(addup.accumulation_hex)}</div>
+                        <div className="w-full flex justify-around">
+                        </div>    
+                    </div>
+                    )
+                })}
+
+                </div>
+            </div>
+
+        );
+    }
     
 
 
@@ -491,6 +540,15 @@ const Application = () => {
                     return;
                 }
                 console.log("Going Through");
+                function toUtf32Le(str: string) {
+                    const codePoints = Array.from(str);
+                    const buffer = Buffer.alloc(codePoints.length * 4);
+                    for (let i = 0; i < codePoints.length; i++) {
+                        buffer.writeUInt32LE(codePoints[i].codePointAt(0) || 0, i * 4);
+                    }
+                    return buffer;
+                }
+                setStringAnalyzed32([...stringAnalyzed32.slice(0,index), await analyzeUtf32String(toUtf32Le(e.target.value)),...stringAnalyzed32.slice(index+1)])
                 setStringAnalyzed([...stringAnalyzed.slice(0,index), newState,...stringAnalyzed.slice(index+1)])  
                 setStringAnalyzed16([...stringAnalyzed16.slice(0,index), await analyzeUtf16String(Buffer.from(e.target.value, 'utf16le')),...stringAnalyzed16.slice(index+1)])
                 //lastElementRef.current = e.currentTarget
@@ -576,6 +634,28 @@ const Application = () => {
                                 accumulation_hex : "20",
                                 accumulation_dec : "32",
                                 surrogate_addup : 0,
+                            }
+                        ]
+                    }
+                ]])
+                setStringAnalyzed32([...stringAnalyzed32, [
+                    {
+                        position : 0,
+                        codePoint : "20",
+                        numBytes : 1,
+                        grapheme : 1,
+                        characterString : " ",
+                        characterName : "space",
+                        hexRepresentation : "0x20",
+                        addUps : [
+                            {
+                                two_byte_hex : "0x20",
+                                two_byte_bin : "00100000",
+                                value : 32,
+                                result : "32",
+                                multiplier : 1,
+                                accumulation_hex : "20",
+                                accumulation_dec : "32",
                             }
                         ]
                     }
@@ -666,7 +746,21 @@ const Application = () => {
                                     </div>
                                 )
                             })}
-                            {utfVersion == 'utf-16' && stringAnalyzed16[index].map((stringAnalyzed2, code_point) => {
+                            {utfVersion == 'utf-32' && stringAnalyzed32[index].map((stringAnalyzed2, code_point) => {
+                                        return (
+                                            <div className="flex flex-wrap items-center justify-around space-y-12 "key={stringAnalyzed2.characterString}>
+                                                <div className="flex border-t border-gray-200 my-2 w-full">----------------------------------------------------------</div>
+                                                <div className='w-1/2'>
+                                                    <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index, code_point, true)}>Increment Code Point</button>
+                                                </div>
+                                                <div className='w-1/2'>
+                                                    <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index,code_point, false)}>Decrement Code Point</button>
+                                                </div>
+                                                {analyzeUtf32Panel(stringAnalyzed2)}
+                                            </div>
+                                        )
+                                    })}
+                                                        {utfVersion == 'utf-16' && stringAnalyzed16[index].map((stringAnalyzed2, code_point) => {
                                         return (
                                             <div className="flex flex-wrap items-center justify-around space-y-12 "key={stringAnalyzed2.characterString}>
                                                 <div className="flex border-t border-gray-200 my-2 w-full">----------------------------------------------------------</div>
