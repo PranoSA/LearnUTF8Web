@@ -29,9 +29,9 @@ function analyzeCodePointByteArrayUtf32(byteArray: Buffer):Utf32Addup[]{
 
     return [{
         two_byte_hex : value.toString(16).padStart(4,'0'), 
-        two_byte_bin :  value.toString(2).padStart(16,'0'),
-        value : value.toLocaleString().charCodeAt(0),
-        result : value.toLocaleString().charCodeAt(0).toString(16).padStart(4,'0'),
+        two_byte_bin :  value.toString(2).padStart(10,'0'),
+        value : value,
+        result : value.toString(16).padStart(4,'0'),
         multiplier: 1,
         accumulation_hex : value.toString(16).padStart(4,'0'),
         accumulation_dec : value.toString(10).padStart(4,'0'),
