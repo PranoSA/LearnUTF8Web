@@ -143,6 +143,8 @@ const Application = () => {
             newApplication.updated_at = searchParams.get("updated_at") || ""
             newApplication.description = searchParams.get("description") || ""
             let newStringAnalyzed = [] as Utf8Examination[][]
+            let newStringAnalyzed16 = [] as Utf16Examination[][]
+            let newStringAnalyzed32 = [] as Utf32Examination[][]
 
             try {
             newApplication.conversions = JSON.parse(decodeURIComponent(searchParams.get("conversions") || "[]")) 
@@ -152,7 +154,22 @@ const Application = () => {
                         return analyzeUtf8String(Buffer.from(conversion.value))
                     })
                     newStringAnalyzed = await Promise.all(promises)
-
+                    const promises16 = newApplication.conversions.map(async (conversion) => {
+                        return analyzeUtf16String(Buffer.from(conversion.value, 'utf16le'))
+                    })
+                    newStringAnalyzed16 = await Promise.all(promises16)
+                    const promises32 = newApplication.conversions.map(async (conversion) => {
+                        function toUtf32Le(str: string) {
+                            const codePoints = Array.from(str);
+                            const buffer = Buffer.alloc(codePoints.length * 4);
+                            for (let i = 0; i < codePoints.length; i++) {
+                                buffer.writeUInt32LE(codePoints[i].codePointAt(0) || 0, i * 4);
+                            }
+                            return buffer;
+                        }
+                        return analyzeUtf32String(toUtf32Le(conversion.value))
+                    })
+                    newStringAnalyzed32 = await Promise.all(promises32)
                 }
             }
             catch(e){
@@ -161,6 +178,8 @@ const Application = () => {
             newApplication.conversions = newApplication.conversions || []
             setApplication(newApplication as ApplicationType)
             setStringAnalyzed(newStringAnalyzed)
+            setStringAnalyzed16(newStringAnalyzed16)
+            setStringAnalyzed32(newStringAnalyzed32)
             
             setReady(true)
         }
