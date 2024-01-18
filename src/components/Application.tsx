@@ -79,12 +79,14 @@ const Application = () => {
         searchParams.set("description", application?.description || "")
         searchParams.set("conversions",(JSON.stringify(application?.conversions))|| "")
 
+        searchParams.set("utfVersion", utfVersion)
+
         window.history.pushState({}, '', '?' + searchParams.toString());
 
         if (scrollRef.current) {
             scrollRef.current.focus();
         }
-    }, [application])
+    }, [application, utfVersion])
 
     const fetchApplication = async () => {
         //console.log(application?.appid)
@@ -142,6 +144,8 @@ const Application = () => {
             newApplication.created_at = searchParams.get("created_at") || ""
             newApplication.updated_at = searchParams.get("updated_at") || ""
             newApplication.description = searchParams.get("description") || ""
+            
+            utfVersionSet(searchParams.get("utfVersion") || "utf-8")
             let newStringAnalyzed = [] as Utf8Examination[][]
             let newStringAnalyzed16 = [] as Utf16Examination[][]
             let newStringAnalyzed32 = [] as Utf32Examination[][]
@@ -829,10 +833,10 @@ const Application = () => {
                     <button className="bg-red-400 text-white px-4 py-2 rounded">View Saved</button>
                 </Link>
             </div> 
-            <div className='flex pt-20 pb-45 w-full justify-center'>
+            <div className='flex pt-10 pb-45 w-full justify-center'>
                 <button className="bg-blue-400 text-white px-4 py-2 rounded" onClick={() => saveApplication()}>Save</button>
             </div>
-            <div className='w-full flex justify-around'>
+            <div className='w-full flex justify-around py-10'>
             <button 
                     className={`text-white px-4 py-2 rounded w-1/6 ${utfVersion === "utf-8" ? "bg-blue-600" : "bg-blue-200"}`} 
                     onClick={() => swapUtfVersion("utf-8")}
