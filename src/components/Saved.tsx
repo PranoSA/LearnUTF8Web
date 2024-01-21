@@ -26,7 +26,7 @@ const Saved = () => {
     const [username, setUsername]= useState<string | null>(localStorage.getItem('user'));
 
     const [showModal, setShowModal] = useState<boolean>(false)
-
+    
     
 
     useEffect(() => {

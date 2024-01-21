@@ -240,6 +240,25 @@ const Application = () => {
     }
 
 
+    function CheckValidCodePoint(codepoint:number){
+        // Invalid Ranges -> SUrrogate Pairs
+
+        //0xD800 - 0xDFFF
+
+        // More Than 2^20+2^16 -1 
+
+        if(codepoint >= 0xD800 && codepoint <= 0xDFFF){
+            return false
+        }
+
+        if(codepoint > 0x10FFFF){
+            return false
+        }
+        
+        return true;
+
+    }
+
     //Add A Prop That is a function that can be called to modify the the conversion value
     //For that conversion, then call the function with the new value
     //from the increment and decrement functionality
@@ -286,9 +305,23 @@ const Application = () => {
             const newApplication = {...application}
             //How To Decrement The Value
             const currentBytes = Buffer.from(newApplication.conversions[index].value)
+
+            //Get Codepoint at Position
+            
+
             currentBytes[pos+analyzedString.position] = increment ? currentBytes[pos+analyzedString.position] + 1 : currentBytes[pos+analyzedString.position] - 1
             //Get the String 
             const new_string = currentBytes.toString('utf-8')
+            const number_check:number = new_string.codePointAt(pos+analyzedString.position) || 0;
+
+            console.log(new_string);
+            console.log(number_check.toString(16));
+
+            if(!CheckValidCodePoint(number_check)){
+                alert("Invalid Code Point")
+                return 
+            }
+
             newApplication.conversions[index].value = new_string
             setApplication(newApplication)
             const newState = await analyzeUtf8String(currentBytes)

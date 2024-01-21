@@ -243,6 +243,14 @@ async function analyzeUtf16String(buffer:Buffer) :Promise<Utf16Examination[]> {
 
       //const subArray = buffer.slice(i, i + 2*numTwoBytes);
 
+   const newBuffer= Buffer.from(buffer.slice(i, i + 2*numTwoBytes))
+    let NewHexRepresentation = "";
+   
+    for(let j = 0; j < numTwoBytes; j++){
+      
+     NewHexRepresentation +=newBuffer.slice(j*2, j*2+2).reverse().toString('hex').padStart(2*numTwoBytes, '0') 
+    }
+
 
      examinations.push({
         position : i, 
@@ -251,7 +259,8 @@ async function analyzeUtf16String(buffer:Buffer) :Promise<Utf16Examination[]> {
         codePoint: codePoint.toString(16),
         characterName,
         characterString: String.fromCodePoint(codePoint),
-        hexRepresentation:buffer.slice(i,i+2*numTwoBytes).toString('hex').padStart(2*numTwoBytes, '0'),
+        hexRepresentation : NewHexRepresentation,
+        //hexRepresentation:buffer.slice(i,i+2*numTwoBytes).toString('hex').padStart(2*numTwoBytes, '0'),
         addUps: analyzeCodePointByteArrayUtf16(buffer.slice(i,i+2*numTwoBytes), numTwoBytes)
      })
 
