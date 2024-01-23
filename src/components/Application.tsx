@@ -83,9 +83,9 @@ const Application = () => {
 
         window.history.pushState({}, '', '?' + searchParams.toString());
 
-        if (scrollRef.current) {
+       /* if (scrollRef.current) {
             scrollRef.current.focus();
-        }
+        }*/
     }, [application, utfVersion])
 
     const fetchApplication = async () => {
@@ -200,10 +200,10 @@ const Application = () => {
             scrollRef.current.scrollIntoView({ behavior: 'smooth' });
             scrollRef.current = null;
         }*/
-        if (scrollRef.current) {
+        /*if (scrollRef.current) {
 
             scrollRef.current.focus();
-        }
+        }*/
     }, [stringAnalyzed, application]);
 
     if(!application){
