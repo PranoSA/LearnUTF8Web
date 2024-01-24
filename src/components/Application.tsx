@@ -758,11 +758,10 @@ const Application = () => {
                         <input type="text" value={username||""} className="ring-2 ring-blue-500 focus:ring-blue-700 w-full" onChange={e => setUsername(e.target.value)} />
                         </div>
                         <div>
-                            <Link to="/saved">
-                        <button className="bg-blue-500 text-white px-4 py-2 rounded w-full">
+                        <button className="bg-blue-500 text-white px-4 py-2 rounded w-full" onClick={() => VisitSaved()}>
                             View Saved
                         </button>
-                        </Link>
+                   
                         </div>
                  </div>
                 )
