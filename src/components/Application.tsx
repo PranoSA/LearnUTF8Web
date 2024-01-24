@@ -37,6 +37,8 @@ const Application = () => {
     //const [authenticatedUser, isAuthenticatedUser] = useState<boolean>(isAuthenticatedUser());
 
     const [showModal, setShowModal] = useState<boolean>(false)
+    const [showModalSaved, setShowModalSaved] = useState<boolean>(false)
+
     const [username, setUsername] = useState<string|null>(localStorage.getItem('username'))
 
     const [ready, setReady] = useState<boolean>(false)
@@ -729,16 +731,39 @@ const Application = () => {
 
             if(showModal){
                 return (
-                    <div>
+                    <div className=''>
                         <h2>Please enter your username</h2>
-                        <input type="text" value={username||""} className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/4" onChange={e => setUsername(e.target.value)} />
-                        <button onClick={() => {
+                        <div className='w-full'>
+                        <input type="text" value={username||""} className="ring-2 ring-blue-500 focus:ring-blue-700 w-full" onChange={e => setUsername(e.target.value)} />
+                        </div>
+                        <div>
+                        <button className="bg-blue-500 text-white px-4 py-2 rounded w-full"
+                        onClick={() => {
                             localStorage.setItem('username', username||"");
                             setShowModal(false);
                             saveApplication();
                         }}>
                             Submit
                         </button>
+                        </div>
+                 </div>
+                )
+            }
+
+            if(showModalSaved){
+                return (
+                    <div className=''>
+                        <h2>Please enter your username</h2>
+                        <div className='w-full'>
+                        <input type="text" value={username||""} className="ring-2 ring-blue-500 focus:ring-blue-700 w-full" onChange={e => setUsername(e.target.value)} />
+                        </div>
+                        <div>
+                            <Link to="/saved">
+                        <button className="bg-blue-500 text-white px-4 py-2 rounded w-full">
+                            View Saved
+                        </button>
+                        </Link>
+                        </div>
                  </div>
                 )
             }
@@ -857,14 +882,26 @@ const Application = () => {
         return true
     }
 
+    
+
+    const VisitSaved= () => {
+        if(!CheckAuthenticated()){
+            setShowModalSaved(true)
+            return 
+        }
+        window.location.href = "/saved"
+
+    }
+
+
     //Display Application Display + Save Button Styled With Tailwind CSS
     return (
         <div className='flex flex-wrap justify-center'>
             {CheckAuthenticated()? IsAuthenticatedDisplay(): <div></div>}
             <div className='w-full flex justify-center'> 
-                <Link to="/saved">
-                    <button className="bg-red-400 text-white px-4 py-2 rounded">View Saved</button>
-                </Link>
+
+                    <button className="bg-red-400 text-white px-4 py-2 rounded" onClick={() => VisitSaved()}>View Saved</button>
+                
             </div> 
             <div className='flex pt-10 pb-45 w-full justify-center'>
                 <button className="bg-blue-400 text-white px-4 py-2 rounded" onClick={() => saveApplication()}>Save</button>
