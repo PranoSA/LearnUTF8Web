@@ -73,6 +73,13 @@ async function analyzeUtf32String(buffer:Buffer) :Promise<Utf32Examination[]> {
 
         const hexRepresentation = buffer.slice(position,position+4).toString("hex").padStart(8,'0')
         const addUps = analyzeCodePointByteArrayUtf32(buffer.slice(position,position+4))
+
+        const byteArray = buffer.slice(position,position+4)
+
+        const value = byteArray[3]*0x1000000 + byteArray[2]*0x10000 + byteArray[1]*0x100 + byteArray[0]
+
+
+
         utf32Examinations.push({
             position, 
             codePoint  : codePoint.toString(16),
@@ -80,7 +87,7 @@ async function analyzeUtf32String(buffer:Buffer) :Promise<Utf32Examination[]> {
             grapheme,
             characterString,
             characterName,
-            hexRepresentation,
+            hexRepresentation : value.toString(16).padStart(4,'0'),
             addUps,
         })
     }
