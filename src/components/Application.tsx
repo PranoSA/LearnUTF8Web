@@ -762,6 +762,7 @@ const Application = () => {
                             localStorage.setItem('username', username||"");
                             setShowModalSaved(false);
                             VisitSaved()
+                            console.log(username);
                         }}>
                             View Saved
                         </button>
@@ -888,7 +889,7 @@ const Application = () => {
     
 
     const VisitSaved= () => {
-        if(!CheckAuthenticated()){
+        if(username == null || username == ""){
             setShowModalSaved(true)
             return 
         }
