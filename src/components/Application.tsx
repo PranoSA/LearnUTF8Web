@@ -889,6 +889,7 @@ const Application = () => {
             setShowModalSaved(true)
             return 
         }
+        document.cookie = `user=${username};Path=/`;
         window.location.href = "/saved"
 
     }
