@@ -463,8 +463,8 @@ const Application = () => {
                         <div className = 'w-full'> Hex Representation : 0x{addup.two_byte_hex} </div>
                         <div className='w-full'> Binary Representation : 0b{addup.two_byte_bin} </div>
                         <div className='w-full'> Encoding Bits : {addup.surrogate_mask} </div>
-                        <div className='w-full'> Decimal Byte Value : {addup.result} </div>
-                        <div className='w-full'> Value : {addup.value} </div>
+                        <div className='w-full'> Hexadecimal Value : {addup.value.toString(16)} </div>
+                        <div className='w-full'> Decimal Value : {addup.value} </div>
                         <div className='w-full'> Multiplier : 2^{Math.log2(addup.multiplier)} ({addup.multiplier}) </div>
                         <div className='w-full'> Calculated Value : (Value*Multiplier) </div>
                         <div className='w-full'> Dec : {addup.multiplier*addup.value} </div>

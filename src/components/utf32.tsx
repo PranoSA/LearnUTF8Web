@@ -71,7 +71,7 @@ async function analyzeUtf32String(buffer:Buffer) :Promise<Utf32Examination[]> {
           console.error(e)
         }
 
-        const hexRepresentation = buffer.slice(position,position+4).toString("hex").padStart(8,'0')
+        //const hexRepresentation = buffer.slice(position,position+4).toString("hex").padStart(8,'0')
         const addUps = analyzeCodePointByteArrayUtf32(buffer.slice(position,position+4))
 
         const byteArray = buffer.slice(position,position+4)
