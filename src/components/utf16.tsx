@@ -77,7 +77,7 @@ function analyzeCodePointByteArrayUtf16(byteArray: Buffer, codePoints:number):Ut
 
     if(codePoints == 1){
       return [{
-        two_byte_hex : byteArray.slice(0,2).toString('hex').padStart(4,'0'),
+        two_byte_hex : byteArray.slice(1,2).toString('hex').padStart(4,'0') + byteArray.slice(0,1).toString('hex').padStart(4,'0'),
         two_byte_bin :  byteArray[1].toString(2).padStart(8,'0')+byteArray[0].toString(2).padStart(8,'0'),
         surrogate_mask : '0000000000000000',
         value : byteArray[1]*0x100 + byteArray[0],
