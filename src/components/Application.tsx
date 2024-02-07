@@ -384,6 +384,7 @@ const Application = () => {
                     return (
                         <div className='flex flex-wrap w-full md:w-1/2 lg:w-1/4 border border-green-500 pb-5  justify-right pl-3' key={addup.accumulation_hex}>
                             <div className='w-full'> Byte # {pos+1} </div>
+                            
                             {/*<div className = 'w-full'>  Byte Hex Representation :0x{addup.byte_hex} 
                             </div>*/}
                             <div className='w-full pt-2'>
@@ -417,7 +418,7 @@ const Application = () => {
                                 Encoding Bits : 
                                 </div>
                                 <div className='w-1/2'>
-                                    0bf{addup.byte_mask}
+                                    0b {addup.byte_mask}
                                 </div> 
                             </div>
                             
@@ -426,7 +427,7 @@ const Application = () => {
                                     Binary Encoded Value : 
                                 </div>
                                 <div className='w-1/2'>
-                                    0b{addup.value.toString(2).padStart(8,'0')}
+                                    0b {addup.value.toString(2).padStart(8,'0')}
                                 </div>
                             </div>
 
@@ -462,7 +463,7 @@ const Application = () => {
                                     Multiplier Hex : 
                                 </div>
                                 <div className='w-1/2'>
-                                     0x{addup.multiplier.toString(16)}
+                                     0x{addup.multiplier.toString(16).toUpperCase()}
                                 </div>
                             </div>
                      
@@ -499,7 +500,7 @@ const Application = () => {
                                     Hex : 
                                 </div>
                                 <div className='w-1/2'>
-                                    0x{(addup.multiplier*addup.value).toString(16)}
+                                    0x{(addup.multiplier*addup.value).toString(16).toUpperCase()}
                                 </div>
                             </div>
 
@@ -516,7 +517,7 @@ const Application = () => {
                             <div className='w-full pt-3'> Accumulated Value (Prev Accum. + Calculated) </div>
                             <div className='w-full flex'>
                                 <div className='w-1/2'> Hex - </div>
-                                <div className='w-1/2'> 0x{addup.accumulation_hex} </div>
+                                <div className='w-1/2'> 0x{addup.accumulation_hex.toUpperCase()} </div>
                             </div>
                             <div className='w-full flex pb-5'>
                                 <div className='w-1/2'> Dec - </div>
@@ -609,6 +610,7 @@ const Application = () => {
 
         return (
             <div className='flex flex-wrap w-full ' key={analyzedString.characterString}>
+
                 <div className='w-full'>Grapheme # : {analyzedString.grapheme}</div>
                 <div className='w-full'>
                     Code point at Position {analyzedString.position} : U+{analyzedString.codePoint}
@@ -625,20 +627,154 @@ const Application = () => {
                 <div className="flex w-full border border-blue-600 flex-wrap" >
                 {analyzedString.addUps.map((addup, pos) => {
                     return (
-                    <div className='flex flex-wrap w-full md:w-1/2 lg:w-1/4 border border-green-500 pb-5 justify-right' key={addup.accumulation_hex}>
+                    <div className='flex flex-wrap w-full md:w-1/2 lg:w-1/4 border border-green-500 pb-5 justify-right pl-3 py-3' key={addup.accumulation_hex}>
                         <div className='w-full'> Code Point # {pos+1} </div>
-                        <div className = 'w-full'> Hex Representation : 0x{addup.two_byte_hex} </div>
-                        <div className='w-full'> Binary Representation : 0b{addup.two_byte_bin} </div>
-                        <div className='w-full'> Encoding Bits : {addup.surrogate_mask} </div>
-                        <div className='w-full'> Hexadecimal Value : {addup.value.toString(16)} </div>
-                        <div className='w-full'> Decimal Value : {addup.value} </div>
-                        <div className='w-full'> Multiplier : 2^{Math.log2(addup.multiplier)} ({addup.multiplier}) </div>
-                        <div className='w-full'> Calculated Value : (Value*Multiplier) </div>
-                        <div className='w-full'> Dec : {addup.multiplier*addup.value} </div>
-                        <div className="w-full"> Hex : 0x{(addup.multiplier*addup.value).toString(16)}</div>
-                        <div className='w-full'> Accumulation Value : </div>
-                        <div className='w-full'> Dec - {(addup.accumulation_dec)}</div>
-                        <div className = "w-full"> Hex - 0x{(addup.accumulation_hex)}</div>
+                    <div className='w-full pt-3'> Code Point Representation </div>
+                    <div className='w-full flex'>
+                        <div className="w-1/2">
+                            Hex Representation : 
+                        </div>
+                        <div className='w-1/2'>
+                            0x{addup.two_byte_hex.toUpperCase()}
+                        </div>
+                    </div>
+                    {
+                        analyzedString.addUps.length > 1 ?
+                        <div className='w-full flex'>
+                            <div className="w-1/2">
+                                Surrogate Range: 
+                            </div>
+                            <div className='w-1/2'>
+                                0x{pos == 0? "D800" : "DC00"} - 0x{pos == 0? "DBFF" : "DFFF"}
+                            </div>
+                        </div>
+                        : <div></div>
+                    }
+                    <div className='w-full flex'>
+                        <div className="w-1/2">
+                            Binary Representation: 
+                        </div>
+                        <div className='w-1/2'>
+                            0b{addup.two_byte_bin}
+                        </div>
+                    </div>
+                    <div className='w-full pt-3'> Encoding Values of Codepoint </div>
+                    <div className='w-full flex'>
+                        <div className="w-1/2">
+                            Negating Bits :
+                        </div>
+                        <div className='w-1/2'>
+                            0b {addup.surrogate_mask.substring(0,8).replace(/x/g,"1")} {addup.surrogate_mask.substring(8,16)}
+                        </div>
+                    </div>                    
+                    <div className='w-full flex'>
+                        <div className="w-1/2">
+                            Encoding Bits :
+                        </div>
+                        <div className='w-1/2'>
+                            0b {addup.surrogate_mask.substring(0,8)} {addup.surrogate_mask.substring(8,16)}
+                        </div>
+                    </div> 
+                    <div className='w-full flex'>  
+                        <div className='w-1/2'>
+                            Decimal Value :
+                        </div>
+                        <div className='w-1/2'>
+                            0b {addup.value.toString(2).padStart(16,'0').substring(0,8)} {addup.value.toString(2).padStart(16,'0').substring(8,16)}
+                        </div>
+                    </div>                     
+                    <div className='w-full flex'>  
+                        <div className='w-1/2'>
+                            Hexadecimal Value :
+                        </div>
+                        <div className='w-1/2'>
+                            0x{addup.value.toString(16).padStart(4,'0').toUpperCase()}
+                        </div>
+                    </div>                                     
+                    <div className='w-full flex'>  
+                        <div className='w-1/2'>
+                            Decimal Value :
+                        </div>
+                        <div className='w-1/2'>
+                            {addup.value}
+                        </div>
+                    </div>     
+                    <div className='w-full flex pt-3'>
+                        <div className='w-1/2'>
+                            Multiplier :
+                        </div>
+                        <div className='w-1/2'>
+                            2^{Math.log2(addup.multiplier)} ({addup.multiplier})
+                        </div>
+                    </div>
+                    <div className='w-full flex'>
+                        <div className='w-1/2'>
+                            Multiplier Hex: 
+                        </div>
+                        <div className='w-1/2'>
+                            0x{addup.multiplier.toString(16).padStart(4,'0')}
+                        </div>
+                    </div>
+                    <div className='w-full flex'>
+                        <div className='w-1/2'>
+                            Multiplier Binary:
+                        </div>
+                        <div className='w-1/2'>
+                            0b {addup.multiplier.toString(2).padStart(16,'0').substring(0,8)} {addup.multiplier.toString(2).padStart(16,'0').substring(8,16)}
+                        </div>
+                    </div>                    
+                    <div className='w-full flex'>
+                        <div className='w-1/2'>
+                            Multiplier Decimal:
+                        </div>
+                        <div className='w-1/2'>
+                            {addup.multiplier.toString(10)}
+                        </div>
+                    </div>   
+
+                    <div className='w-full flex pt-3'>
+                        <div className='w-1/2'>
+                            Calculated Value :
+                        </div>
+                        <div className='w-1/2'>
+                            (Value*Multiplier)
+                        </div>
+                    </div>
+                    <div className='w-full flex'>
+                        <div className='w-1/2'>
+                            Hex :
+                        </div>
+                        <div className='w-1/2'>
+                            0x{(addup.multiplier*addup.value).toString(16).padStart(4,'0').toUpperCase()}
+                        </div>
+                    </div>
+                    <div className='w-full flex'>
+                        <div className='w-1/2'>
+                           Bin :
+                        </div>
+                        <div className='w-1/2'>
+                            0b {(addup.multiplier*addup.value).toString(2).padStart(16,'0').substring(0,8)} {(addup.multiplier*addup.value).toString(2).padStart(16,'0').substring(8,16)}
+                        </div>
+                    </div>
+
+                    <div className='w-full flex'>
+                        <div className='w-1/2'>
+                           Decimal :
+                        </div>
+                        <div className='w-1/2'>
+                            {(addup.multiplier*addup.value)}
+                        </div>
+                    </div>
+
+                        <div className='w-full pt-3'> Accumulation Value : (Prev. Accum. + Calculated {pos==1?"+ Surrogate Pair (+0x1000)":""}) </div> 
+                        <div className='w-full flex'>
+                            <div className='w-1/2'> Dec - </div>
+                            <div className = "w-1/2"> {(addup.accumulation_dec)}</div>
+                        </div>
+                        <div className='w-full flex'>
+                            <div className='w-1/2'> Hex - </div>
+                            <div className = "w-1/2"> {(addup.accumulation_hex).toUpperCase()}</div>
+                        </div>                        
                         <div className="w-full flex justify-around">
                         </div>    
                     </div>
@@ -676,7 +812,62 @@ const Application = () => {
                     return (
                     <div className='flex flex-wrap w-full md:w-1/2 lg:w-1/4 border border-green-500 pb-5 justify-right' key={addup.accumulation_hex}>
                         <div className='w-full'> Code Point # {pos+1} </div>
-                        <div className = 'w-full'> Hex Representation : 0x{addup.two_byte_hex} </div>
+                        <div className='w-full flex pt-3'>
+                        <div className='w-1/2'> Hex Representation </div>
+                        <div className='w-1/2'> 0x{addup.two_byte_hex} </div>
+                        </div>
+                        <div className='w-full flex'>
+                        <div className='w-1/2'> Binary Representation </div>
+                        <div className='w-1/2'> 0b{addup.two_byte_bin} </div>
+                        </div>
+                        <div className='w-full flex pt-3'>
+                        <div className='w-1/2'> Encoding Bits </div>
+                        <div className='w-1/2'> 0b {"".padStart(11,'x')+"".padStart(21,'0')} </div>
+                        </div>
+                        <div className='w-full flex'>
+                        <div className='w-1/2'>  Binary  Byte Value </div>
+                        <div className='w-1/2'> 0b {addup.value.toString(2).padStart(32,'0')} </div>
+                        </div>
+
+                        <div className='w-full flex'>
+                        <div className='w-1/2'> Decimal Byte Value </div>
+                        <div className='w-1/2'> {addup.value.toString(10)} </div>
+                        </div>
+                        <div className='w-full flex'>
+                        <div className='w-1/2'> Hex Value </div>
+                        <div className='w-1/2'> {addup.value.toString(16)} </div>
+                        </div>
+                        <div className='w-full flex pt-3'>
+                        <div className='w-1/2'> Multiplier </div>
+                        <div className='w-1/2'> 2^{Math.log2(addup.multiplier)} ({addup.multiplier}) </div>
+                        </div>
+                        <div className='w-full flex'>
+                        <div className='w-1/2'> Calculated Value </div>
+                        <div className='w-1/2'> (Value*Multiplier) </div>
+                        </div>
+                        <div className='w-full flex'>
+                        <div className='w-1/2'> Dec </div>
+                        <div className='w-1/2'> {addup.multiplier*addup.value} </div>
+                        </div>
+                        <div className='w-full flex'>
+                        <div className='w-1/2'> Hex </div>
+                        <div className='w-1/2'> 0x{(addup.multiplier*addup.value).toString(16)}</div>
+                        </div>
+                        <div className='w-full flex pt-3'>
+                        <div className='w-1/2'> Accumulation Value </div>
+                        <div className='w-1/2'> </div>
+                        </div>
+                        <div className='w-full flex'>
+                        <div className='w-1/2'> Dec </div>
+                        <div className='w-1/2'> {(addup.accumulation_dec)}</div>
+                        </div>
+                        <div className='w-full flex'>
+                        <div className='w-1/2'> Hex </div>
+                        <div className='w-1/2'> 0x{(addup.accumulation_hex)}</div>
+                        </div>
+
+                        
+                        {/*<div className = 'w-full'> Hex Representation : 0x{addup.two_byte_hex} </div>
                         <div className='w-full'> Binary Representation : 0b{addup.two_byte_bin} </div>
                         <div className='w-full'> Encoding Bits : {"".padStart(11,'x')+"".padStart(21,'0')} </div>
                         <div className='w-full'> Decimal Byte Value : {addup.value.toString(10)} </div>
@@ -687,7 +878,7 @@ const Application = () => {
                         <div className="w-full"> Hex : 0x{(addup.multiplier*addup.value).toString(16)}</div>
                         <div className='w-full'> Accumulation Value : </div>
                         <div className='w-full'> Dec - {(addup.accumulation_dec)}</div>
-                        <div className = "w-full"> Hex - 0x{(addup.accumulation_hex)}</div>
+                    <div className = "w-full"> Hex - 0x{(addup.accumulation_hex)}</div>*/}
                         <div className="w-full flex justify-around">
                         </div>    
                     </div>
@@ -1005,7 +1196,7 @@ const Application = () => {
             
                                     <div className="flex flex-wrap items-center justify-around space-y-12 "key={stringAnalyzed2.characterString}>
                                                {minimization[index] === false ?<div className='flex flex-wrap items-center justify-around space-y-12'>
-                                                    <div className="flex border-t border-gray-200 my-2 w-full">----------------------------------------------------------</div>
+                                                    <div className="flex border-t border-gray-200 my-2 w-full">------------------------------------</div>
                                                         <div className='w-1/2'>
                                                             <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index, code_point, true)}>Increment Code Point</button>
                                                         </div>
@@ -1022,7 +1213,7 @@ const Application = () => {
                                             <div className="flex flex-wrap items-center justify-around space-y-12 "key={stringAnalyzed2.characterString}>
                                                 
                                                 {minimization[index] === false ?<div className='flex flex-wrap items-center justify-around space-y-12'>
-                                                    <div className="flex border-t border-gray-200 my-2 w-full">----------------------------------------------------------</div>
+                                                    <div className="flex border-t border-gray-200 my-2 w-full">-----------------------</div>
                                                         <div className='w-1/2'>
                                                             <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index, code_point, true)}>Increment Code Point</button>
                                                         </div>
