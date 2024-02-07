@@ -110,11 +110,20 @@ const Application = () => {
         })
 
         const promises16 = data.conversions.map(async (conversion:enumeratedConversion) => {
-            return analyzeUtf16String(Buffer.from(conversion.value))
+            return analyzeUtf16String(Buffer.from(conversion.value, 'utf16le'))
         })
 
+
         const promises32 = data.conversions.map(async (conversion:enumeratedConversion) => {
-            return analyzeUtf32String(Buffer.from(conversion.value))
+            function toUtf32Le(str: string) {
+                const codePoints = Array.from(str);
+                const buffer = Buffer.alloc(codePoints.length * 4);
+                for (let i = 0; i < codePoints.length; i++) {
+                    buffer.writeUInt32LE(codePoints[i].codePointAt(0) || 0, i * 4);
+                }
+                return buffer;
+            }
+            return analyzeUtf32String(toUtf32Le(conversion.value))
         })
         
 
