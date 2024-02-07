@@ -33,6 +33,7 @@ const Application = () => {
     const [ stringAnalyzed, setStringAnalyzed ] = useState<Utf8Examination [][]>([])
     const [searchParams] = useSearchParams();
     const scrollRef = useRef<HTMLElement | null>(null);
+    const [minimization, setMinimizations] = useState<boolean[]>([]);
 
     //const [authenticatedUser, isAuthenticatedUser] = useState<boolean>(isAuthenticatedUser());
 
@@ -134,6 +135,8 @@ const Application = () => {
         newStringAnalyzed = await Promise.all(promises)
         newStringAnalyzed16 = await Promise.all(promises16)
         newStringAnalyzed32 = await Promise.all(promises32)
+
+        setMinimizations(newStringAnalyzed.map((value) => true))
         setReady(true)
         setStringAnalyzed(newStringAnalyzed)
         setStringAnalyzed16(newStringAnalyzed16)
@@ -210,7 +213,7 @@ const Application = () => {
             setStringAnalyzed(newStringAnalyzed)
             setStringAnalyzed16(newStringAnalyzed16)
             setStringAnalyzed32(newStringAnalyzed32)
-            
+            setMinimizations([...minimization, true])
             setReady(true)
         }
 
@@ -290,6 +293,10 @@ const Application = () => {
     //from the increment and decrement functionality
     const AnalyzePanel =  (analyzedString:Utf8Examination, index:number) => {
 
+        if(minimization[index]){
+            return <div></div>
+        }
+    
             
         /*
             Flex Size = 4 in Large, 6 in Medium, 12 in Small
@@ -324,7 +331,7 @@ const Application = () => {
 
             Add a Button That Ups the U+ Value For that codepoint instead of the byte 
         */
-        
+
 
         const changeByte =  async ( e:React.MouseEvent<HTMLButtonElement>,  index:number,pos:number, increment:boolean) => {
                                 
@@ -422,6 +429,9 @@ const Application = () => {
     //from the increment and decrement functionality
     const AnalyzePanelUTF16 =  (analyzedString:Utf16Examination, index:number) => {
 
+        if(minimization[index]){
+            return <div></div>
+        }
             
         /*
             Flex Size = 4 in Large, 6 in Medium, 12 in Small
@@ -507,9 +517,13 @@ const Application = () => {
         )
     }
 
-    const analyzeUtf32Panel = (analyzedString:Utf32Examination) => {
-        
-        return     (
+    const analyzeUtf32Panel = (analyzedString:Utf32Examination, index:number) => {
+
+        if(minimization[index]){
+            return <div></div>
+        }
+
+        return     (       
             <div className='flex flex-wrap w-full ' key={analyzedString.characterString}>
                 <div className='w-full'>Grapheme # : {analyzedString.grapheme}</div>
                 <div className='w-full'>
@@ -667,6 +681,7 @@ const Application = () => {
                 
                 scrollRef.current = e.currentTarget as HTMLElement
                 lastElementRef.current = e.currentTarget as HTMLElement;
+                setMinimizations([...minimization, false]);
             }
 
             const initializeCodepoint = () => {
@@ -834,23 +849,37 @@ const Application = () => {
                             <div className='w-full flex justify-center p-20 '>
                                 <label className="flex justify-center w-full">
                                     <div className='w-1/7 pr-10'> String {index +1} :</div>
-                                <input className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/4" type="text" onClick = {(e) => lastElementRef.current = e.currentTarget } value={conversion.value} onChange={(e) => handleTextInputChange(e,index)} />
+                                <input className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/2" type="text" onClick = {(e) => lastElementRef.current = e.currentTarget } value={conversion.value} onChange={(e) => handleTextInputChange(e,index)} />
                                 </label>
+                                {   minimization[index] === false ?
+                                    <div className="flex flex-wrap w-1/6 justify-center">
+                                    <button className="bg-blue-500 text-white px-4 py-2 rounded w-full" onClick={() => setMinimizations([...minimization.slice(0,index), !minimization[index],...minimization.slice(index+1)])}>Hide Unicode</button>
+                                    </div>:
+                                    <div className="flex flex-wrap w-1/6 justify-center">
+                                    <button className="bg-blue-500 text-white px-4 py-2 rounded w-full" onClick={() => setMinimizations([...minimization.slice(0,index), !minimization[index],...minimization.slice(index+1)])}>Inspect Unicode</button>
+                                    </div>
+                                }
+                
                             </div>
                             {utfVersion === 'utf-8' && stringAnalyzed[index].map((stringAnalyzed2, code_point) => {
                                 //Analyze Panel, Displaying the stringAnalyzed
                                 //And A button that changes the state by incrementing the Unicode Value 
                                 //This function gets iterates through the lsit of codepoints in stringAnalyzed
                                 //Add Button That increments the current codepoint and displays the new stringAnalyzed
+                                
+
                                 return (
+            
                                     <div className="flex flex-wrap items-center justify-around space-y-12 "key={stringAnalyzed2.characterString}>
-                                        <div className="flex border-t border-gray-200 my-2 w-full">----------------------------------------------------------</div>
-                                        <div className='w-1/2'>
-                                            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index, code_point, true)}>Increment Code Point</button>
-                                        </div>
-                                        <div className='w-1/2'>
-                                            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index,code_point, false)}>Decrement Code Point</button>
-                                        </div>
+                                               {minimization[index] === false ?<div className='flex flex-wrap items-center justify-around space-y-12'>
+                                                    <div className="flex border-t border-gray-200 my-2 w-full">----------------------------------------------------------</div>
+                                                        <div className='w-1/2'>
+                                                            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index, code_point, true)}>Increment Code Point</button>
+                                                        </div>
+                                                        <div className='w-1/2'>
+                                                            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index,code_point, false)}>Decrement Code Point</button>
+                                                        </div>
+                                                </div>:null}
                                         {AnalyzePanel(stringAnalyzed2, index)}
                                     </div>
                                 )
@@ -858,27 +887,32 @@ const Application = () => {
                             {utfVersion == 'utf-32' && stringAnalyzed32[index].map((stringAnalyzed2, code_point) => {
                                         return (
                                             <div className="flex flex-wrap items-center justify-around space-y-12 "key={stringAnalyzed2.characterString}>
-                                                <div className="flex border-t border-gray-200 my-2 w-full">----------------------------------------------------------</div>
-                                                <div className='w-1/2'>
-                                                    <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index, code_point, true)}>Increment Code Point</button>
-                                                </div>
-                                                <div className='w-1/2'>
-                                                    <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index,code_point, false)}>Decrement Code Point</button>
-                                                </div>
-                                                {analyzeUtf32Panel(stringAnalyzed2)}
+                                                
+                                                {minimization[index] === false ?<div className='flex flex-wrap items-center justify-around space-y-12'>
+                                                    <div className="flex border-t border-gray-200 my-2 w-full">----------------------------------------------------------</div>
+                                                        <div className='w-1/2'>
+                                                            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index, code_point, true)}>Increment Code Point</button>
+                                                        </div>
+                                                        <div className='w-1/2'>
+                                                            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index,code_point, false)}>Decrement Code Point</button>
+                                                        </div>
+                                                </div>:null}
+                                                {analyzeUtf32Panel(stringAnalyzed2,index)}
                                             </div>
                                         )
                                     })}
                                                         {utfVersion == 'utf-16' && stringAnalyzed16[index].map((stringAnalyzed2, code_point) => {
                                         return (
                                             <div className="flex flex-wrap items-center justify-around space-y-12 "key={stringAnalyzed2.characterString}>
-                                                <div className="flex border-t border-gray-200 my-2 w-full">----------------------------------------------------------</div>
-                                                <div className='w-1/2'>
-                                                    <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index, code_point, true)}>Increment Code Point</button>
-                                                </div>
-                                                <div className='w-1/2'>
-                                                    <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index,code_point, false)}>Decrement Code Point</button>
-                                                </div>
+                                                 {minimization[index] === false ?<div className='flex flex-wrap items-center justify-around space-y-12'>
+                                                    <div className="flex border-t border-gray-200 my-2 w-full">----------------------------------------------------------</div>
+                                                        <div className='w-1/2'>
+                                                            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index, code_point, true)}>Increment Code Point</button>
+                                                        </div>
+                                                        <div className='w-1/2'>
+                                                            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={(e) => changeCodepoint(e,index,code_point, false)}>Decrement Code Point</button>
+                                                        </div>
+                                                </div>:null}
                                                 {AnalyzePanelUTF16(stringAnalyzed2, index)}
                                             </div>
                                         )
