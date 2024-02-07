@@ -109,11 +109,26 @@ const Application = () => {
             return analyzeUtf8String(Buffer.from(conversion.value))
         })
 
+        const promises16 = data.conversions.map(async (conversion:enumeratedConversion) => {
+            return analyzeUtf16String(Buffer.from(conversion.value))
+        })
+
+        const promises32 = data.conversions.map(async (conversion:enumeratedConversion) => {
+            return analyzeUtf32String(Buffer.from(conversion.value))
+        })
+        
+
         let newStringAnalyzed = [] as Utf8Examination[][]
+        let newStringAnalyzed16 = [] as Utf16Examination[][]
+        let newStringAnalyzed32 = [] as Utf32Examination[][]
 
         newStringAnalyzed = await Promise.all(promises)
+        newStringAnalyzed16 = await Promise.all(promises16)
+        newStringAnalyzed32 = await Promise.all(promises32)
         setReady(true)
         setStringAnalyzed(newStringAnalyzed)
+        setStringAnalyzed16(newStringAnalyzed16)
+        setStringAnalyzed32(newStringAnalyzed32)
     }
     
 
