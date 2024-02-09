@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { getByName, setByName } from "./common_fetch";
 
 const base_url_api = `${import.meta.env.VITE_REACT_APP_API_URL}/unicode/`;
 
@@ -201,22 +202,29 @@ async function analyzeUtf8String(buffer:Buffer) :Promise<Utf8Examination[]> {
 
       if(codePoint == undefined){return [];}
 
-      
-      try{
-      //const res = await fetch(base_url_api + codePoint.toString(16));
-      //The Actual Character
-      const res = await fetch(base_url_api + String.fromCodePoint(codePoint))
+            
+      const cachedCharacter = getByName(String.fromCodePoint(codePoint));
 
-      const body = await res.json();
-
-      //characterName = body.na;
-        characterName = body.unicode_name;
-
-      }catch(e){
-        console.error(e)
+      if(cachedCharacter != null){
+        characterName = cachedCharacter
       }
 
+      else {
+        try {
+          const res = await fetch(base_url_api + String.fromCodePoint(codePoint))
 
+          const body = await res.json();
+    
+          //characterName = body.na;
+            characterName = body.unicode_name;
+            setByName(String.fromCodePoint(codePoint), characterName)
+    
+        }catch(e){
+          console.error(e)
+        }
+      }
+
+      
       //console.log(`Code Point at position ${i}: U+${codePoint.toString(16)},   Number Bytes ${numBytes}, Grapheme ${which_grapheme} : ${String.fromCodePoint(codePoint)} : (${characterName})`);
 
       //console.log(`\t Raw Hexdecimal Representation: ${subArray.toString('hex').padStart(2*numBytes, '0')} \n`)

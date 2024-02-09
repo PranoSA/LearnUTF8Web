@@ -1170,10 +1170,10 @@ const Application = () => {
                 {application.conversions.map((conversion, index) => {
                     return (
                         <div className="flex flex-wrap justify-around w-full" key={"Application" + index}> 
-                            <div className='w-full flex justify-center p-20 '>
-                                <label className="flex justify-center w-full">
+                            <div className='w-full flex justify-center p-20 text-4x1'>
+                                <label className="flex justify-center w-full text-3x1">
                                     <div className='w-1/7 pr-10'> String {index +1} :</div>
-                                <input className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/2" type="text" onClick = {(e) => lastElementRef.current = e.currentTarget } value={conversion.value} onChange={(e) => handleTextInputChange(e,index)} />
+                                <input className="ring-2 text-2x1 ring-blue-500 focus:ring-blue-700 w-1/2" type="text" onClick = {(e) => lastElementRef.current = e.currentTarget } value={conversion.value} onChange={(e) => handleTextInputChange(e,index)} />
                                 </label>
                                 {   minimization[index] === false ?
                                     <div className="flex flex-wrap w-1/6 justify-center">

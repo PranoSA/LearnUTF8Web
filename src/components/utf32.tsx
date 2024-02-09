@@ -1,4 +1,5 @@
 import { Buffer } from "buffer";
+import { getByName, setByName } from "./common_fetch";
 
 const base_url_api = `${import.meta.env.VITE_REACT_APP_API_URL}/unicode/`;
 
@@ -55,20 +56,31 @@ async function analyzeUtf32String(buffer:Buffer) :Promise<Utf32Examination[]> {
         let characterName = ""
 
         if(codePoint == undefined){return [];}
+
+        const cachedCharacter = getByName(String.fromCodePoint(codePoint))
   
+        if (cachedCharacter){
+            characterName = cachedCharacter
+        }
+        else {
         
-        try{
-        //const res = await fetch(base_url_api + codePoint.toString(16));
-        //The Actual Character
-        const res = await fetch(base_url_api + String.fromCodePoint(codePoint))
-  
-        const body = await res.json();
-  
-        //characterName = body.na;
-          characterName = body.unicode_name;
-  
-        }catch(e){
-          console.error(e)
+            try{
+            //const res = await fetch(base_url_api + codePoint.toString(16));
+            //The Actual Character
+            const res = await fetch(base_url_api + String.fromCodePoint(codePoint))
+    
+            const body = await res.json();
+    
+            //characterName = body.na;
+            characterName = body.unicode_name;
+
+            setByName(String.fromCodePoint(codePoint), characterName)
+
+
+    
+            }catch(e){
+            console.error(e)
+            }
         }
 
         //const hexRepresentation = buffer.slice(position,position+4).toString("hex").padStart(8,'0')
@@ -77,7 +89,6 @@ async function analyzeUtf32String(buffer:Buffer) :Promise<Utf32Examination[]> {
         const byteArray = buffer.slice(position,position+4)
 
         const value = byteArray[3]*0x1000000 + byteArray[2]*0x10000 + byteArray[1]*0x100 + byteArray[0]
-
 
 
         utf32Examinations.push({
