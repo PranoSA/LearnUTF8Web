@@ -58,8 +58,13 @@ async function analyzeUtf32String(buffer:Buffer) :Promise<Utf32Examination[]> {
         if(codePoint == undefined){return [];}
 
         const cachedCharacter = getByName(String.fromCodePoint(codePoint))
+
+        if(codePoint == 32){
+            characterName = "space"
+          }
+    
   
-        if (cachedCharacter){
+        else if (cachedCharacter){
             characterName = cachedCharacter
         }
         else {
