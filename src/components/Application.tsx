@@ -237,6 +237,17 @@ const Application = () => {
     asyncInitFunction();
   }, []);
 
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        console.log('Text copied to clipboard');
+      })
+      .catch((err) => {
+        console.error('Failed to copy text: ', err);
+      });
+  };
+
   useEffect(() => {
     /*if (scrollRef.current) {
             scrollRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -1368,11 +1379,28 @@ const Application = () => {
                   <ol className="w-full flex flex-wrap">
                     {(graphemeNameString[index] || []).map((name, idx) => (
                       <div
-                        className="w-full md:w-1/3 lg:w-1/4 pl-1 pb-4"
+                        className="w-full md:w-1/3 lg:w-1/4 pl-2 pb-4"
                         key={idx}
                       >
                         <li value={idx + 1}>
-                          {idx + 1}.{name}
+                          {/* Also Add the textual representation of the grapheme component */}
+                          <span className="relative group">
+                            <span
+                              onClick={() =>
+                                copyToClipboard(
+                                  stringAnalyzed[index][idx].characterString
+                                )
+                              }
+                              style={{ cursor: 'pointer', marginRight: '4px' }}
+                            >
+                              📋
+                            </span>
+                            <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2">
+                              Copy
+                            </span>
+                          </span>
+                          {idx + 1}.{name}{' '}
+                          {stringAnalyzed[index][idx].characterString}
                         </li>
                       </div>
                     ))}
