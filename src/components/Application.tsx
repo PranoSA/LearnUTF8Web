@@ -390,22 +390,6 @@ const Application = () => {
         className="flex flex-wrap w-full "
         key={analyzedString.characterString}
       >
-        <div className="w-full items-center justify-around p-5 ">
-          {/* title called "grapheme component names" */}
-          <h1 className="text-2xl font-bold flex">Grapheme Component Names</h1>
-        </div>
-        <div className="w-full flex items-center flex-wrap justify-start p-5 pb-10">
-          {/* map the names list to a list of <li> elements */}
-          <ol className="w-full flex flex-wrap">
-            {graphemeNameString[index].map((name, idx) => (
-              <div className="w-full md:w-1/3 lg:w-1/4 pl-1 pb-4" key={idx}>
-                <li value={idx + 1}>
-                  {idx + 1}.{name}
-                </li>
-              </div>
-            ))}
-          </ol>
-        </div>
         <div className="w-full">Grapheme # : {analyzedString.grapheme}</div>
         <div className="w-full">
           Code point at Position {analyzedString.position} : U+
@@ -1372,6 +1356,27 @@ const Application = () => {
                       </button>
                     </div>
                   )}
+                </div>
+                <div className="w-full items-center justify-around p-5 ">
+                  {/* title called "grapheme component names" */}
+                  <h1 className="text-2xl font-bold flex">
+                    Grapheme Component Names
+                  </h1>
+                </div>
+                <div className="w-full flex items-center flex-wrap justify-start p-5 pb-10">
+                  {/* map the names list to a list of <li> elements */}
+                  <ol className="w-full flex flex-wrap">
+                    {(graphemeNameString[index] || []).map((name, idx) => (
+                      <div
+                        className="w-full md:w-1/3 lg:w-1/4 pl-1 pb-4"
+                        key={idx}
+                      >
+                        <li value={idx + 1}>
+                          {idx + 1}.{name}
+                        </li>
+                      </div>
+                    ))}
+                  </ol>
                 </div>
                 {utfVersion === 'utf-8' &&
                   stringAnalyzed[index].map((stringAnalyzed2, code_point) => {
