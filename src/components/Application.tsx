@@ -396,11 +396,15 @@ const Application = () => {
         </div>
         <div className="w-full flex items-center flex-wrap justify-start p-5 pb-10">
           {/* map the names list to a list of <li> elements */}
-          {graphemeNameString[index].map((name, index) => (
-            <div className="w-full md:w-1/3 lg:w-1/4 pl-5">
-              <li key={index}>{name}</li>
-            </div>
-          ))}
+          <ol className="w-full flex flex-wrap">
+            {graphemeNameString[index].map((name, idx) => (
+              <div className="w-full md:w-1/3 lg:w-1/4 pl-1 pb-4" key={idx}>
+                <li value={idx + 1}>
+                  {idx + 1}.{name}
+                </li>
+              </div>
+            ))}
+          </ol>
         </div>
         <div className="w-full">Grapheme # : {analyzedString.grapheme}</div>
         <div className="w-full">
