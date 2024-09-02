@@ -94,6 +94,10 @@ const Application = () => {
       JSON.stringify(application?.conversions) || ''
     );
 
+    const conversions = JSON.stringify(application?.conversions) || '';
+
+    //for each conversion, set minimization to true
+
     searchParams.set('utfVersion', utfVersion);
 
     window.history.pushState({}, '', '?' + searchParams.toString());
@@ -188,6 +192,7 @@ const Application = () => {
         newApplication.conversions = JSON.parse(
           decodeURIComponent(searchParams.get('conversions') || '[]')
         );
+
         //On Mount, Set all the String Analyzed Properties from the Query Parameters
         if (newApplication.conversions) {
           const promises = newApplication.conversions.map(
@@ -195,6 +200,10 @@ const Application = () => {
               return analyzeUtf8String(Buffer.from(conversion.value));
             }
           );
+          const minimization = newApplication.conversions.map(() => true);
+
+          setMinimizations(minimization);
+
           newStringAnalyzed = await Promise.all(promises);
           const promises16 = newApplication.conversions.map(
             async (conversion) => {
@@ -203,6 +212,7 @@ const Application = () => {
               );
             }
           );
+
           newStringAnalyzed16 = await Promise.all(promises16);
           const promises32 = newApplication.conversions.map(
             async (conversion) => {
@@ -317,7 +327,7 @@ const Application = () => {
   //For that conversion, then call the function with the new value
   //from the increment and decrement functionality
   const AnalyzePanel = (analyzedString: Utf8Examination, index: number) => {
-    if (minimization[index]) {
+    if (minimization[index] || true === true) {
       return <div></div>;
     }
 
@@ -597,7 +607,7 @@ const Application = () => {
     analyzedString: Utf16Examination,
     index: number
   ) => {
-    if (minimization[index]) {
+    if (minimization[index] || true === true) {
       return <div></div>;
     }
 
@@ -830,7 +840,7 @@ const Application = () => {
     analyzedString: Utf32Examination,
     index: number
   ) => {
-    if (minimization[index]) {
+    if (minimization[index] || true === true) {
       return <div></div>;
     }
 
@@ -1457,7 +1467,7 @@ const Application = () => {
                         className="flex flex-wrap items-center justify-around space-y-12 "
                         key={stringAnalyzed2.characterString}
                       >
-                        {minimization[index] === false ? (
+                        {minimization[index] || false === false ? (
                           <div className="flex flex-wrap items-center justify-around space-y-12">
                             <div className="flex border-t border-gray-200 my-2 w-full">
                               -----------------------
