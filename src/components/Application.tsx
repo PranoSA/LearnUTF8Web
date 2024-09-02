@@ -1388,7 +1388,8 @@ const Application = () => {
                             <span
                               onClick={() =>
                                 copyToClipboard(
-                                  stringAnalyzed[index][idx].characterString
+                                  stringAnalyzed[index][idx]?.characterString ||
+                                    ''
                                 )
                               }
                               style={{ cursor: 'pointer', marginRight: '4px' }}
@@ -1400,7 +1401,7 @@ const Application = () => {
                             </span>
                           </span>
                           {idx + 1}.{name}{' '}
-                          {stringAnalyzed[index][idx].characterString}
+                          {stringAnalyzed[index][idx]?.characterString || ''}
                         </li>
                       </div>
                     ))}
