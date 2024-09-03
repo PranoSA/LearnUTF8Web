@@ -107,6 +107,10 @@ const Application = () => {
         }*/
   }, [application, utfVersion]);
 
+  useEffect(() => {
+    console.log('minimization', minimization);
+  }, [minimization]);
+
   const fetchApplication = async () => {
     //console.log(application?.appid)
     //if(application?.appid === undefined) return
@@ -155,7 +159,10 @@ const Application = () => {
     newStringAnalyzed16 = await Promise.all(promises16);
     newStringAnalyzed32 = await Promise.all(promises32);
 
-    setMinimizations(newStringAnalyzed.map((value) => true));
+    const new_minimization = data.conversions.map(() => true);
+    console.log('New Minimization From Fetch', new_minimization);
+
+    setMinimizations(new_minimization);
     setReady(true);
     setStringAnalyzed(newStringAnalyzed);
     setStringAnalyzed16(newStringAnalyzed16);
@@ -166,7 +173,6 @@ const Application = () => {
     const asyncInitFunction = async () => {
       if (applicationId != null) {
         try {
-          console.log('Start Fetch');
           await fetchApplication();
           return;
         } catch (e) {
@@ -187,6 +193,7 @@ const Application = () => {
       let newStringAnalyzed = [] as Utf8Examination[][];
       let newStringAnalyzed16 = [] as Utf16Examination[][];
       let newStringAnalyzed32 = [] as Utf32Examination[][];
+      let newMinimizations = [] as boolean[];
 
       try {
         newApplication.conversions = JSON.parse(
@@ -201,8 +208,10 @@ const Application = () => {
             }
           );
           const minimization = newApplication.conversions.map(() => true);
+          console.log('New Conversions', newApplication.conversions);
+          console.log('New Minimization', minimization);
 
-          setMinimizations(minimization);
+          newMinimizations = minimization;
 
           newStringAnalyzed = await Promise.all(promises);
           const promises16 = newApplication.conversions.map(
@@ -240,7 +249,7 @@ const Application = () => {
       setStringAnalyzed(newStringAnalyzed);
       setStringAnalyzed16(newStringAnalyzed16);
       setStringAnalyzed32(newStringAnalyzed32);
-      setMinimizations([...minimization, true]);
+      setMinimizations([...newMinimizations]);
       setReady(true);
     };
 
@@ -250,9 +259,7 @@ const Application = () => {
   const copyToClipboard = (text: string) => {
     navigator.clipboard
       .writeText(text)
-      .then(() => {
-        console.log('Text copied to clipboard');
-      })
+      .then(() => {})
       .catch((err) => {
         console.error('Failed to copy text: ', err);
       });
@@ -290,7 +297,6 @@ const Application = () => {
     document.cookie = `user=${username};Path=/`;
 
     if (application == null) return;
-    console.log(application);
     const response = await fetch(
       `${import.meta.env.VITE_REACT_APP_API_URL}/application`,
       {
@@ -327,7 +333,7 @@ const Application = () => {
   //For that conversion, then call the function with the new value
   //from the increment and decrement functionality
   const AnalyzePanel = (analyzedString: Utf8Examination, index: number) => {
-    if (minimization[index] || true === true) {
+    if (minimization[index] === true) {
       return <div></div>;
     }
 
@@ -385,9 +391,6 @@ const Application = () => {
       const number_check: number =
         new_string.codePointAt(pos + analyzedString.position) || 0;
 
-      console.log(new_string);
-      console.log(number_check.toString(16));
-
       if (!CheckValidCodePoint(number_check)) {
         alert('Invalid Code Point');
         return;
@@ -409,7 +412,7 @@ const Application = () => {
     return (
       <div
         className="flex flex-wrap w-full "
-        key={analyzedString.characterString}
+        key={analyzedString.characterString + index}
       >
         <div className="w-full">Grapheme # : {analyzedString.grapheme}</div>
         <div className="w-full">
@@ -437,7 +440,7 @@ const Application = () => {
             return (
               <div
                 className="flex flex-wrap w-full md:w-1/2 lg:w-1/4 border border-green-500 pb-5  justify-right pl-3"
-                key={addup.accumulation_hex}
+                key={addup.accumulation_hex + pos + index}
               >
                 <div className="w-full"> Byte # {pos + 1} </div>
 
@@ -657,7 +660,7 @@ const Application = () => {
     return (
       <div
         className="flex flex-wrap w-full "
-        key={analyzedString.characterString}
+        key={analyzedString.characterString + index}
       >
         <div className="w-full">Grapheme # : {analyzedString.grapheme}</div>
         <div className="w-full">
@@ -685,7 +688,7 @@ const Application = () => {
             return (
               <div
                 className="flex flex-wrap w-full md:w-1/2 lg:w-1/4 border border-green-500 pb-5 justify-right pl-3 py-3"
-                key={addup.accumulation_hex}
+                key={addup.accumulation_hex + pos + index}
               >
                 <div className="w-full"> Code Point # {pos + 1} </div>
                 <div className="w-full pt-3"> Code Point Representation </div>
@@ -847,7 +850,7 @@ const Application = () => {
     return (
       <div
         className="flex flex-wrap w-full "
-        key={analyzedString.characterString}
+        key={analyzedString.characterString + index}
       >
         <div className="w-full">Grapheme # : {analyzedString.grapheme}</div>
         <div className="w-full">
@@ -875,7 +878,7 @@ const Application = () => {
             return (
               <div
                 className="flex flex-wrap w-full md:w-1/2 lg:w-1/4 border border-green-500 pb-5 justify-right"
-                key={addup.accumulation_hex}
+                key={addup.accumulation_hex + pos + index}
               >
                 <div className="w-full"> Code Point # {pos + 1} </div>
                 <div className="w-full flex pt-3">
@@ -1021,18 +1024,17 @@ const Application = () => {
       index: number
     ) => {
       const newApplication = { ...application };
-      console.log(e.currentTarget);
-      console.log('Change Scroll Ref');
+
       scrollRef.current = e.currentTarget as HTMLElement;
       newApplication.conversions[index].value = e.target.value;
       setApplication(newApplication);
       const newState = await analyzeUtf8String(Buffer.from(e.target.value));
       setApplication(newApplication);
-      console.log('Input Change');
+
       if (lastElementRef.current?.tagName == 'BUTTON') {
         return;
       }
-      console.log('Going Through');
+
       function toUtf32Le(str: string) {
         const codePoints = Array.from(str);
         const buffer = Buffer.alloc(codePoints.length * 4);
@@ -1057,7 +1059,6 @@ const Application = () => {
         ...stringAnalyzed16.slice(index + 1),
       ]);
       //lastElementRef.current = e.currentTarget
-      console.log(stringAnalyzed16);
     };
 
     const changeCodepoint = async (
@@ -1250,7 +1251,6 @@ const Application = () => {
                 localStorage.setItem('username', username || '');
                 setShowModalSaved(false);
                 VisitSaved();
-                console.log(username);
               }}
             >
               View Saved
@@ -1390,7 +1390,7 @@ const Application = () => {
                     {(graphemeNameString[index] || []).map((name, idx) => (
                       <div
                         className="w-full md:w-1/3 lg:w-1/4 pl-2 pb-4"
-                        key={idx}
+                        key={idx + index + name}
                       >
                         <li value={idx + 1}>
                           {/* Also Add the textual representation of the grapheme component */}
@@ -1427,7 +1427,9 @@ const Application = () => {
                     return (
                       <div
                         className="flex flex-wrap items-center justify-around space-y-12 "
-                        key={stringAnalyzed2.characterString}
+                        key={
+                          stringAnalyzed2.characterString + code_point + index
+                        }
                       >
                         {minimization[index] === false ? (
                           <div className="flex flex-wrap items-center justify-around space-y-12">
@@ -1465,7 +1467,9 @@ const Application = () => {
                     return (
                       <div
                         className="flex flex-wrap items-center justify-around space-y-12 "
-                        key={stringAnalyzed2.characterString}
+                        key={
+                          stringAnalyzed2.characterString + code_point + index
+                        }
                       >
                         {minimization[index] || false === false ? (
                           <div className="flex flex-wrap items-center justify-around space-y-12">
@@ -1503,7 +1507,9 @@ const Application = () => {
                     return (
                       <div
                         className="flex flex-wrap items-center justify-around space-y-12 "
-                        key={stringAnalyzed2.characterString}
+                        key={
+                          stringAnalyzed2.characterString + code_point + index
+                        }
                       >
                         {minimization[index] === false ? (
                           <div className="flex flex-wrap items-center justify-around space-y-12">

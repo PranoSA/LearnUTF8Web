@@ -48,9 +48,6 @@ async function analyzeUtf32String(buffer: Buffer): Promise<Utf32Examination[]> {
   const utf32Examinations: Utf32Examination[] = [];
 
   for (let position = 0; position < buffer.length; position += 4) {
-    console.log(buffer);
-    console.log(position + ' : ?');
-
     const codePoint =
       buffer[3 + position] * 0x1000000 +
       buffer[2 + position] * 0x10000 +

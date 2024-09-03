@@ -103,7 +103,7 @@ function analyzeCodePointByteArrayUtf16(
     // Also, Add 2^16 to the total value at the end to get the actual code point
 
     // Not Sure How I should ressemble the 2^16 in the addup array
-    console.log(byteArray);
+
     return [
       {
         two_byte_hex:
@@ -163,7 +163,6 @@ async function analyzeUtf16String(buffer: Buffer): Promise<Utf16Examination[]> {
 
   let numTwoBytes = 1;
 
-  console.log(buffer.length);
   for (let i = 0; i < buffer.length; ) {
     /**
         
@@ -185,19 +184,12 @@ async function analyzeUtf16String(buffer: Buffer): Promise<Utf16Examination[]> {
       */
     const firstCodePointValue = buffer[i + 1] * 0x100 + buffer[i];
 
-    console.log(buffer);
-
-    console.log(firstCodePointValue); //
-
     if (firstCodePointValue >= 0xd800 && firstCodePointValue <= 0xdbff) {
       numTwoBytes = 2;
-      console.log(i);
+
       //Make Sure 2nd Of Pair si between 0xDC00 and 0xDFFF
       const secondByte = [buffer[i + 3], buffer[i + 2]];
       const secondByteValue = secondByte[0] * 0x100 + secondByte[1];
-
-      console.log(firstCodePointValue.toString(16));
-      console.log(secondByteValue.toString(16));
 
       if (!(secondByteValue >= 0xdc00 && secondByteValue <= 0xdfff)) {
         console.error(
@@ -252,10 +244,6 @@ async function analyzeUtf16String(buffer: Buffer): Promise<Utf16Examination[]> {
       }
     }
 
-    //console.log(`Code Point at position ${i}: U+${codePoint.toString(16)},   Number Bytes ${numBytes}, Grapheme ${which_grapheme} : ${String.fromCodePoint(codePoint)} : (${characterName})`);
-
-    //console.log(`\t Raw Hexdecimal Representation: ${subArray.toString('hex').padStart(2*numBytes, '0')} \n`)
-    //console.log("Byte By Byte Calculation")
     const subArray: Buffer = Buffer.from([]);
     if (numTwoBytes == 2) {
       subArray[0] = buffer[i + 1];
@@ -295,10 +283,6 @@ async function analyzeUtf16String(buffer: Buffer): Promise<Utf16Examination[]> {
       ),
     });
 
-    console.log('i');
-    console.log(numTwoBytes);
-    // Move to the next position in the Buffer
-    console.log(i);
     i += 2 * numTwoBytes;
 
     numTwoBytes = 1;
