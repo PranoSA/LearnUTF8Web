@@ -1108,11 +1108,12 @@ const Application = () => {
 
       scrollRef.current = e.currentTarget as HTMLElement;
       lastElementRef.current = e.currentTarget as HTMLElement;
-      setMinimizations([...minimization, false]);
+      //setMinimizations([...minimization, false]);
     };
 
     const initializeCodepoint = () => {
       const newApplication = { ...application };
+      setMinimizations([...minimization, true]);
       newApplication.conversions.push({ value: ' ' });
       setApplication(newApplication);
       setStringAnalyzed([
