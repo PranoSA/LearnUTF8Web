@@ -1411,7 +1411,8 @@ const Application = () => {
                             </span>
                           </span>
                           {idx + 1}.{name}{' '}
-                          {stringAnalyzed[index][idx]?.characterString || ''}
+                          {stringAnalyzed[index][idx]?.characterString || ''}{' '}
+                          (U+{stringAnalyzed[index][idx]?.codePoint || ''})
                         </li>
                       </div>
                     ))}
