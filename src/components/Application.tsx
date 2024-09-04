@@ -610,7 +610,7 @@ const Application = () => {
     analyzedString: Utf16Examination,
     index: number
   ) => {
-    if (minimization[index] || true === true) {
+    if (minimization[index] === true) {
       return <div></div>;
     }
 
@@ -843,7 +843,7 @@ const Application = () => {
     analyzedString: Utf32Examination,
     index: number
   ) => {
-    if (minimization[index] || true === true) {
+    if (minimization[index] === true) {
       return <div></div>;
     }
 
