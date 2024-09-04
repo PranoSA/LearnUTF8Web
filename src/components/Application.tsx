@@ -1359,7 +1359,7 @@ const Application = () => {
                           ])
                         }
                       >
-                        Hide Unicode
+                        Hide Encoding
                       </button>
                     </div>
                   ) : (
@@ -1374,7 +1374,7 @@ const Application = () => {
                           ])
                         }
                       >
-                        Inspect Unicode
+                        Inspect Encoding
                       </button>
                     </div>
                   )}
