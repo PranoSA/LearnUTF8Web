@@ -1473,7 +1473,7 @@ const Application = () => {
                           stringAnalyzed2.characterString + code_point + index
                         }
                       >
-                        {minimization[index] || false === false ? (
+                        {minimization[index] === false ? (
                           <div className="flex flex-wrap items-center justify-around space-y-12">
                             <div className="flex border-t border-gray-200 my-2 w-full">
                               -----------------------
