@@ -6,6 +6,8 @@ import { analyzeUtf8String, Utf8Examination } from './utf8';
 import { Buffer } from 'buffer';
 import { analyzeUtf16String, Utf16Examination } from './utf16';
 import { Utf32Examination, analyzeUtf32String } from './utf32';
+import { Settings, SettingsModalProps } from './SettingsModal';
+import SettingsModal from './SettingsModal';
 
 //faicon for loading
 import {
@@ -26,22 +28,6 @@ type enumeratedConversion = {
   value: string;
 };
 
-type Settings = {
-  utfVersion: 'utf-8' | 'utf-16' | 'utf-32';
-  showHex: boolean;
-  showBinary: boolean;
-  showDecimal: boolean;
-  showCalculations: boolean;
-  showRepresentation: boolean;
-  showMultiplier: boolean;
-  showAccumulation: boolean;
-  showEncodedValues: boolean;
-  showGraphemeInfo: boolean;
-  showFinalCalculation: boolean;
-  showIncremenetDecrementByte: boolean;
-  showIncrementDecrementCodePoint: boolean;
-};
-
 //Application Component
 const Application = () => {
   const { applicationId } = useParams<{ applicationId: string }>();
@@ -51,7 +37,9 @@ const Application = () => {
   const scrollRef = useRef<HTMLElement | null>(null);
   const [minimization, setMinimizations] = useState<boolean[]>([]);
 
-  const [incrementValue, setIncrementValue] = useState<number>(1);
+  const [incrementValue, setIncrementValue] = useState<string>('1');
+  const [incrementMode, setIncrementMode] = useState<'hex' | 'dec'>('hex');
+  const [incrementError, setIncrementError] = useState<string | null>(null);
 
   const [settings, setSettings] = useState<Settings>({
     utfVersion: 'utf-8',
@@ -63,9 +51,9 @@ const Application = () => {
     showMultiplier: true,
     showAccumulation: true,
     showEncodedValues: true,
-    showGraphemeInfo: false,
+    showGraphemeInfo: true,
     showFinalCalculation: true,
-    showIncremenetDecrementByte: true,
+    showIncremenetDecrementByte: false,
     showIncrementDecrementCodePoint: true,
   });
 
@@ -74,150 +62,6 @@ const Application = () => {
   };
 
   const [openSettingsModal, setOpenSettingsModal] = useState<boolean>(false);
-
-  type SettingsModalProps = {
-    currentSettings: Settings;
-    setSetting: (setting: keyof Settings, value: boolean) => void;
-    closeSettingsModal: () => void;
-  };
-
-  const SettingsModal: React.FC<SettingsModalProps> = ({
-    currentSettings,
-    setSetting,
-    closeSettingsModal,
-  }) => {
-    return (
-      <div
-        className="fixed z-10 inset-0 overflow-y-auto"
-        onClick={closeSettingsModal}
-      >
-        <div className="fixed inset-0 bg-black opacity-50 items-center flex flex-row"></div>
-        <div
-          className="relative flex items-center justify-center "
-          //make sure doesn't propagate to parent
-        >
-          <div
-            className="bg-white rounded-lg shadow-lg p-6  max-w-md mx-auto border-red-400 border-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-xl font-bold mb-4">Settings</h2>
-            <label className="flex items-center mb-2">
-              <input
-                type="checkbox"
-                checked={currentSettings.showHex}
-                onChange={(e) => setSetting('showHex', e.target.checked)}
-                className="mr-2"
-              />
-              Show Hexadecimal
-            </label>
-            <label className="flex items-center mb-2">
-              <input
-                type="checkbox"
-                checked={currentSettings.showBinary}
-                onChange={(e) => setSetting('showBinary', e.target.checked)}
-                className="mr-2"
-              />
-              Show Binary
-            </label>
-
-            <label className="flex items-center mb-2">
-              <input
-                type="checkbox"
-                checked={currentSettings.showDecimal}
-                onChange={(e) => setSetting('showDecimal', e.target.checked)}
-                className="mr-2"
-              />
-              Show Decimal
-            </label>
-            <label className="flex items-center mb-2">
-              <input
-                type="checkbox"
-                checked={currentSettings.showCalculations}
-                onChange={(e) =>
-                  setSetting('showCalculations', e.target.checked)
-                }
-                className="mr-2"
-              />
-              Show Calculations
-            </label>
-            {/* Show Multiplier */}
-            <label className="flex items-center mb-2">
-              <input
-                type="checkbox"
-                checked={currentSettings.showMultiplier}
-                onChange={(e) => setSetting('showMultiplier', e.target.checked)}
-                className="mr-2"
-              />
-              Show Multiplier
-            </label>
-            {/* Show Grapheme Info */}
-            <label className="flex items-center mb-2">
-              <input
-                type="checkbox"
-                checked={currentSettings.showGraphemeInfo}
-                onChange={(e) =>
-                  setSetting('showGraphemeInfo', e.target.checked)
-                }
-                className="mr-2"
-              />
-              Show Grapheme Info
-            </label>
-            {/*SHow Accumulation */}
-            <label className="flex items-center mb-2">
-              <input
-                type="checkbox"
-                checked={currentSettings.showAccumulation}
-                onChange={(e) =>
-                  setSetting('showAccumulation', e.target.checked)
-                }
-                className="mr-2"
-              />
-              Show Accumulation
-            </label>
-            {/* Show increment decrement byte */}
-            <label className="flex items-center mb-2">
-              <input
-                type="checkbox"
-                checked={currentSettings.showIncremenetDecrementByte}
-                onChange={(e) =>
-                  setSetting('showIncremenetDecrementByte', e.target.checked)
-                }
-                className="mr-2"
-              />
-              Show Increment Decrement Byte
-            </label>
-            {/* Show increment decrement code point */}
-            <label className="flex items-center mb-2">
-              <input
-                type="checkbox"
-                checked={currentSettings.showIncrementDecrementCodePoint}
-                onChange={(e) =>
-                  setSetting(
-                    'showIncrementDecrementCodePoint',
-                    e.target.checked
-                  )
-                }
-                className="mr-2"
-              />
-              Show Increment Decrement Code Point
-            </label>
-            {/* Show Final Calculation */}
-            <label className="flex items-center mb-2">
-              <input
-                type="checkbox"
-                checked={currentSettings.showFinalCalculation}
-                onChange={(e) =>
-                  setSetting('showFinalCalculation', e.target.checked)
-                }
-                className="mr-2"
-              />
-              Show Final Calculation
-            </label>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   //const [authenticatedUser, isAuthenticatedUser] = useState<boolean>(isAuthenticatedUser());
 
@@ -628,7 +472,7 @@ const Application = () => {
             </div>
           </div>
         )}
-        <div className="py-5 w-full"></div>
+        <div className="py-1 w-full"></div>
 
         <div className="flex w-full border border-blue-600 flex-wrap text-lg">
           {analyzedString.addUps.map((addup, pos) => {
@@ -1525,6 +1369,11 @@ const Application = () => {
       );
     }
 
+    const parsedValue =
+      incrementMode === 'dec'
+        ? parseInt(incrementValue, 10)
+        : parseInt(incrementValue, 16);
+
     if (showModalSaved) {
       return (
         <div className="">
@@ -1684,45 +1533,151 @@ const Application = () => {
                                 <div className=" h-[20px]">
                                   <button
                                     className=" text-blue-700 text-xl px-4 py-2 rounded w-full"
-                                    onClick={(e) =>
+                                    onClick={(e) => {
+                                      if (isNaN(parsedValue)) {
+                                        const error_message =
+                                          incrementMode === 'dec'
+                                            ? 'Increment Value must contain a valid decimal number [0-9]'
+                                            : 'Increment Value must contain a valid hexadecimal number [0-9, a-f]';
+
+                                        setIncrementError(error_message);
+                                        return;
+                                      }
+                                      setIncrementError(null);
                                       changeCodepoint(
                                         e,
                                         index,
                                         code_point,
                                         true,
-                                        incrementValue
-                                      )
-                                    }
+                                        //increment value -> parse base 10 if dec and base 16 if hex
+                                        //for incrementMode
+                                        parsedValue
+                                      );
+                                    }}
                                   >
                                     Increment Code Point [+]
                                   </button>
                                 </div>
                                 {/* THis is for changing the increment value */}
                                 <div className="h-[20px] border-gray-500">
+                                  <label
+                                    htmlFor="incrementValue"
+                                    className="text-gray-700"
+                                  >
+                                    Increment Ammount:
+                                  </label>
                                   <input
-                                    type="number"
+                                    id="incrementValue"
+                                    type="text"
                                     value={incrementValue}
                                     onChange={(e) =>
-                                      setIncrementValue(
-                                        parseInt(e.target.value)
+                                      // test if value is valid number
+
+                                      {
+                                        //if increment mode is dec, test if value is a valid decimal number
+                                        //if increment mode is hex, test if value is a valid hex number
+                                        const test_string = e.target
+                                          .value as string;
+
+                                        console.log('Test String', test_string);
+
+                                        //test if value is a valid number based on incrementMode
+                                        let incorrect = false;
+                                        if (
+                                          incrementMode === 'dec' &&
+                                          !/^\d+$/.test(test_string)
+                                        ) {
+                                          console.log('Dec mode');
+                                          incorrect = true;
+                                          setIncrementError(
+                                            'Increment Value must contain a valid decimal number [0-9]'
+                                          );
+                                        } else if (
+                                          incrementMode === 'hex' &&
+                                          !/^[0-9a-fA-F]+$/.test(test_string)
+                                        ) {
+                                          incorrect = true;
+                                          console.log('Hex mode');
+                                          setIncrementError(
+                                            'Increment Value must contain a valid hexadecimal number [0-9, a-f]'
+                                          );
+                                        }
+                                        console.log(
+                                          'Is it incorrect?',
+                                          incorrect
+                                        );
+
+                                        if (!incorrect) {
+                                          setIncrementError(null);
+                                        }
+
+                                        setIncrementValue(
+                                          e.target.value as string
+                                        );
+                                      }
+                                    }
+                                    aria-errormessage={`${incrementError}`}
+                                    className={`
+                                      border-4 
+                                      ${
+                                        incrementError
+                                          ? 'border-red-500'
+                                          : 'border-gray-300 focus:border-blue-500'
+                                      } 
+                                      focus:ring focus:ring-blue-200 rounded px-2 py-1`}
+                                  />
+                                </div>
+                                {/* toggle to set increment mode to hex or dec 
+                                should be a toggle that switches incrementMode between hex and dec
+                                */}
+                                <div className="flex items-center space-x-4">
+                                  <label
+                                    htmlFor="incrementMode"
+                                    className="text-gray-700"
+                                  >
+                                    Increment Mode:
+                                  </label>
+                                  <select
+                                    id="incrementMode"
+                                    value={incrementMode}
+                                    onChange={(e) =>
+                                      setIncrementMode(
+                                        e.target.value as 'hex' | 'dec'
                                       )
                                     }
                                     className="border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded px-2 py-1"
-                                  />
+                                  >
+                                    <option value="dec">Decimal</option>
+                                    <option value="hex">Hexadecimal</option>
+                                  </select>
                                 </div>
 
                                 <div className=" h-[20px]">
                                   <button
                                     className=" text-red-700 text-xl px-4 py-2 rounded w-full"
-                                    onClick={(e) =>
+                                    onClick={(e) => {
+                                      //check parsed value - see if its valid
+                                      if (isNaN(parsedValue)) {
+                                        console.log('parsedValue', parsedValue);
+
+                                        const error_message =
+                                          incrementMode === 'dec'
+                                            ? 'Increment Value must contain a valid decimal number [0-9]'
+                                            : 'Increment Value must contain a valid hexadecimal number [0-9, a-f]';
+
+                                        setIncrementError(error_message);
+                                        return;
+                                      }
+                                      setIncrementError(null);
+
                                       changeCodepoint(
                                         e,
                                         index,
                                         code_point,
                                         false,
-                                        incrementValue
-                                      )
-                                    }
+                                        parsedValue
+                                      );
+                                    }}
                                   >
                                     Decrement Code Point [-]
                                   </button>
