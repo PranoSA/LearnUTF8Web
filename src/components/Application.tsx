@@ -7,6 +7,12 @@ import { Buffer } from 'buffer';
 import { analyzeUtf16String, Utf16Examination } from './utf16';
 import { Utf32Examination, analyzeUtf32String } from './utf32';
 
+//faicon for loading
+import {
+  //loading icon
+  FaSpinner,
+} from 'react-icons/fa';
+
 type ApplicationType = {
   appid: string;
   name: string;
@@ -20,6 +26,22 @@ type enumeratedConversion = {
   value: string;
 };
 
+type Settings = {
+  utfVersion: 'utf-8' | 'utf-16' | 'utf-32';
+  showHex: boolean;
+  showBinary: boolean;
+  showDecimal: boolean;
+  showCalculations: boolean;
+  showRepresentation: boolean;
+  showMultiplier: boolean;
+  showAccumulation: boolean;
+  showEncodedValues: boolean;
+  showGraphemeInfo: boolean;
+  showFinalCalculation: boolean;
+  showIncremenetDecrementByte: boolean;
+  showIncrementDecrementCodePoint: boolean;
+};
+
 //Application Component
 const Application = () => {
   const { applicationId } = useParams<{ applicationId: string }>();
@@ -28,6 +50,174 @@ const Application = () => {
   const [searchParams] = useSearchParams();
   const scrollRef = useRef<HTMLElement | null>(null);
   const [minimization, setMinimizations] = useState<boolean[]>([]);
+
+  const [incrementValue, setIncrementValue] = useState<number>(1);
+
+  const [settings, setSettings] = useState<Settings>({
+    utfVersion: 'utf-8',
+    showHex: true,
+    showBinary: false,
+    showDecimal: false,
+    showCalculations: true,
+    showRepresentation: true,
+    showMultiplier: true,
+    showAccumulation: true,
+    showEncodedValues: true,
+    showGraphemeInfo: false,
+    showFinalCalculation: true,
+    showIncremenetDecrementByte: true,
+    showIncrementDecrementCodePoint: true,
+  });
+
+  const setSetting = (setting: keyof Settings, value: boolean) => {
+    setSettings({ ...settings, [setting]: value });
+  };
+
+  const [openSettingsModal, setOpenSettingsModal] = useState<boolean>(false);
+
+  type SettingsModalProps = {
+    currentSettings: Settings;
+    setSetting: (setting: keyof Settings, value: boolean) => void;
+    closeSettingsModal: () => void;
+  };
+
+  const SettingsModal: React.FC<SettingsModalProps> = ({
+    currentSettings,
+    setSetting,
+    closeSettingsModal,
+  }) => {
+    return (
+      <div
+        className="fixed z-10 inset-0 overflow-y-auto"
+        onClick={closeSettingsModal}
+      >
+        <div className="fixed inset-0 bg-black opacity-50 items-center flex flex-row"></div>
+        <div
+          className="relative flex items-center justify-center "
+          //make sure doesn't propagate to parent
+        >
+          <div
+            className="bg-white rounded-lg shadow-lg p-6  max-w-md mx-auto border-red-400 border-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-xl font-bold mb-4">Settings</h2>
+            <label className="flex items-center mb-2">
+              <input
+                type="checkbox"
+                checked={currentSettings.showHex}
+                onChange={(e) => setSetting('showHex', e.target.checked)}
+                className="mr-2"
+              />
+              Show Hexadecimal
+            </label>
+            <label className="flex items-center mb-2">
+              <input
+                type="checkbox"
+                checked={currentSettings.showBinary}
+                onChange={(e) => setSetting('showBinary', e.target.checked)}
+                className="mr-2"
+              />
+              Show Binary
+            </label>
+
+            <label className="flex items-center mb-2">
+              <input
+                type="checkbox"
+                checked={currentSettings.showDecimal}
+                onChange={(e) => setSetting('showDecimal', e.target.checked)}
+                className="mr-2"
+              />
+              Show Decimal
+            </label>
+            <label className="flex items-center mb-2">
+              <input
+                type="checkbox"
+                checked={currentSettings.showCalculations}
+                onChange={(e) =>
+                  setSetting('showCalculations', e.target.checked)
+                }
+                className="mr-2"
+              />
+              Show Calculations
+            </label>
+            {/* Show Multiplier */}
+            <label className="flex items-center mb-2">
+              <input
+                type="checkbox"
+                checked={currentSettings.showMultiplier}
+                onChange={(e) => setSetting('showMultiplier', e.target.checked)}
+                className="mr-2"
+              />
+              Show Multiplier
+            </label>
+            {/* Show Grapheme Info */}
+            <label className="flex items-center mb-2">
+              <input
+                type="checkbox"
+                checked={currentSettings.showGraphemeInfo}
+                onChange={(e) =>
+                  setSetting('showGraphemeInfo', e.target.checked)
+                }
+                className="mr-2"
+              />
+              Show Grapheme Info
+            </label>
+            {/*SHow Accumulation */}
+            <label className="flex items-center mb-2">
+              <input
+                type="checkbox"
+                checked={currentSettings.showAccumulation}
+                onChange={(e) =>
+                  setSetting('showAccumulation', e.target.checked)
+                }
+                className="mr-2"
+              />
+              Show Accumulation
+            </label>
+            {/* Show increment decrement byte */}
+            <label className="flex items-center mb-2">
+              <input
+                type="checkbox"
+                checked={currentSettings.showIncremenetDecrementByte}
+                onChange={(e) =>
+                  setSetting('showIncremenetDecrementByte', e.target.checked)
+                }
+                className="mr-2"
+              />
+              Show Increment Decrement Byte
+            </label>
+            {/* Show increment decrement code point */}
+            <label className="flex items-center mb-2">
+              <input
+                type="checkbox"
+                checked={currentSettings.showIncrementDecrementCodePoint}
+                onChange={(e) =>
+                  setSetting(
+                    'showIncrementDecrementCodePoint',
+                    e.target.checked
+                  )
+                }
+                className="mr-2"
+              />
+              Show Increment Decrement Code Point
+            </label>
+            {/* Show Final Calculation */}
+            <label className="flex items-center mb-2">
+              <input
+                type="checkbox"
+                checked={currentSettings.showFinalCalculation}
+                onChange={(e) =>
+                  setSetting('showFinalCalculation', e.target.checked)
+                }
+                className="mr-2"
+              />
+              Show Final Calculation
+            </label>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   //const [authenticatedUser, isAuthenticatedUser] = useState<boolean>(isAuthenticatedUser());
 
@@ -68,6 +258,9 @@ const Application = () => {
   const swapUtfVersion = (s: string) => {
     utfVersionSet(s);
   };
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const [loadingIndex, setLoadingIndex] = useState<number | null>(null);
 
   /*
     Add Functionality to be able to share the entire application state in a query string
@@ -419,20 +612,22 @@ const Application = () => {
           Code point at Position {analyzedString.position} : U+
           {analyzedString.codePoint}
         </div>
-        <div className="w-full">
-          <div className="w-1/2">
-            {' '}
-            Number of Bytes : {analyzedString.numBytes}
-          </div>
+        {settings.showGraphemeInfo && (
+          <div className="w-full">
+            <div className="w-1/2">
+              {' '}
+              Number of Bytes : {analyzedString.numBytes}
+            </div>
 
-          <div className="w-1/2">
-            textRepresentation : {analyzedString.characterString}
+            <div className="w-1/2">
+              textRepresentation : {analyzedString.characterString}
+            </div>
+            <div className="w-1/2">Name: {analyzedString.characterName}</div>
+            <div className="w-1/2">
+              Raw Hex : 0x{analyzedString.hexRepresentation}
+            </div>
           </div>
-          <div className="w-1/2">Name: {analyzedString.characterName}</div>
-          <div className="w-1/2">
-            Raw Hex Representation: 0x{analyzedString.hexRepresentation}
-          </div>
-        </div>
+        )}
         <div className="py-5 w-full"></div>
 
         <div className="flex w-full border border-blue-600 flex-wrap text-lg">
@@ -446,158 +641,235 @@ const Application = () => {
 
                 {/*<div className = 'w-full'>  Byte Hex Representation :0x{addup.byte_hex} 
                             </div>*/}
-                <div className="w-full pt-2">Byte Representation :</div>
-                <div className="w-full flex">
-                  <div className="w-1/2">Hex Representation :</div>
-                  <div className="w-1/2">0x{addup.byte_hex}</div>
+                <div
+                  className="w-full pt-2"
+                  title="The Raw Byte Representation in Hex and Binary Encoding"
+                >
+                  Byte Representation :
                 </div>
-
-                <div className="w-full flex ">
-                  <div className="w-1/2">Byte Binary Representation :</div>
-                  <div className="w-1/2">0b{addup.byte_bin}</div>
-                </div>
-
-                <div className="w-full pt-3"> Encoded Values of Byte : </div>
-
-                <div className="w-full flex">
-                  <div className="w-1/2">Encoding Bits :</div>
-                  <div className="w-1/2">0b {addup.byte_mask}</div>
-                </div>
-
-                <div className="w-full flex">
-                  <div className="w-1/2">Binary Encoded Value :</div>
-                  <div className="w-1/2">
-                    0b {addup.value.toString(2).padStart(8, '0')}
-                  </div>
-                </div>
-
-                <div className="w-full flex">
-                  <div className="w-1/2">Hex Encoded Value :</div>
-                  <div className="w-1/2">
-                    0x{addup.value.toString(16).padStart(2, '0')}
-                  </div>
-                </div>
-
-                <div className="w-full flex">
-                  <div className="w-1/2">Deimal Encoded Value :</div>
-                  <div className="w-1/2">{addup.value}</div>
-                </div>
-
-                <div className="w-full flex pt-3">
-                  <div className="w-1/2">Multiplier :</div>
-                  <div className="w-1/2">
-                    (0b01 {'<<'} {6 * (analyzedString.addUps.length - pos - 1)})
-                  </div>
-                </div>
-
-                <div className="w-full flex">
-                  <div className="w-1/2">Multiplier Hex :</div>
-                  <div className="w-1/2">
-                    0x{addup.multiplier.toString(16).toUpperCase()}
-                  </div>
-                </div>
-
-                <div className="w-full flex ">
-                  <div className="w-1/2">Multiplier Bin:</div>
-                  <div className="w-1/2">
-                    0b01 {'<<'} {Math.log2(addup.multiplier)}
-                  </div>
-                </div>
-
-                <div className="w-full flex ">
-                  <div className="w-1/2">Multiplier Decimal:</div>
-                  <div className="w-1/2">
-                    2^{Math.log2(addup.multiplier)} = ({addup.multiplier})
-                  </div>
-                </div>
-
-                <div className="w-full flex pt-3 ">
-                  <div className="w-1/2">Calculated Values :</div>
-                  <div className="w-1/2">(Value*Multiplier)</div>
-                </div>
-
-                <div className="w-full flex ">
-                  <div className="w-1/2">Hex :</div>
-                  <div className="w-1/2">
-                    0x
-                    {(addup.multiplier * addup.value)
-                      .toString(16)
-                      .toUpperCase()}
-                  </div>
-                </div>
-
-                <div className="w-full flex ">
-                  <div className="w-1/2">Dec :</div>
-                  <div className="w-1/2">{addup.multiplier * addup.value}</div>
-                </div>
-
-                <div className="w-full pt-3">
-                  {' '}
-                  Accumulated Value (Prev Accum. + Calculated){' '}
-                </div>
-                <div className="w-full flex">
-                  <div className="w-1/2"> Hex - </div>
-                  <div className="w-1/2">
-                    {' '}
-                    0x{addup.accumulation_hex.toUpperCase()}{' '}
-                  </div>
-                </div>
-                <div className="w-full flex pb-5">
-                  <div className="w-1/2"> Dec - </div>
-                  <div className="w-1/2"> {addup.accumulation_dec} </div>
-                </div>
-
-                <div className="w-full flex justify-around">
-                  <button
-                    className="bg-blue-500 p-2 text-white px-4 py-4 text-sm "
-                    onClick={(e) => changeByte(e, index, pos, true)}
+                {settings.showHex && (
+                  <div
+                    className="w-full flex cursor-pointer"
+                    title="The Raw Byte Representation in Hex and Binary Encoding"
                   >
-                    Increment Byte
-                  </button>
-                  <button
-                    className="bg-red-500 p-2 text-white px-4 py-4 text-sm"
-                    onClick={(e) => changeByte(e, index, pos, false)}
+                    <div className="w-1/2">Hex :</div>
+                    <div className="w-1/2">0x{addup.byte_hex}</div>
+                  </div>
+                )}
+
+                {settings.showBinary && (
+                  <div
+                    className="w-full flex "
+                    title="The Raw Byte Representation in Hex and Binary Encoding"
                   >
-                    Decrement Byte
-                  </button>
-                </div>
+                    <div className="w-1/2">Byte Binary :</div>
+                    <div className="w-1/2">0b{addup.byte_bin}</div>
+                  </div>
+                )}
+
+                {settings.showEncodedValues && (
+                  <>
+                    <div className="w-full pt-3">
+                      {' '}
+                      Encoded Values of Byte :{' '}
+                    </div>
+
+                    {settings.showBinary && (
+                      <div
+                        className="w-full flex cursor-pointer"
+                        title="For UTF-8, The Leading Byte Starts with N 1's and 0, where N represents the number of bytes in the codepoint. The following bytes then start with with '10' - called continuation bytes. However, for single byte sequences - codepoints are ASCII-compatible and start with '0' and range from 0x00 - 0xFF. This section demonstrates the bits used to encode a value and excludes the bits encoding sequence length or continuation. 
+                 "
+                      >
+                        <div className="w-1/2">Encoding Bits :</div>
+                        <div className="w-1/2">0b {addup.byte_mask}</div>
+                      </div>
+                    )}
+
+                    {settings.showHex && (
+                      <div className="w-full flex">
+                        <div className="w-1/2">Hex Value :</div>
+                        <div className="w-1/2">
+                          0x {addup.value.toString(16).padStart(2, '0')}
+                        </div>
+                      </div>
+                    )}
+
+                    {settings.showDecimal && (
+                      <div className="w-full flex">
+                        <div className="w-1/2">Decimal Value :</div>
+                        <div className="w-1/2">{addup.value}</div>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {settings.showMultiplier && (
+                  <>
+                    <div
+                      className="w-full flex pt-3 cursor-pointer"
+                      title="The Multiplier Ressembles the 'Place' that the byte is at - and demonstrates the value that the byte is going to contribute to final unicode scalar value. For UTF-8, this is 2^ [6 * (# bytes after in codepoint)], because continuation bytes have 6 encoding bits. This is equivalent to the '9' in '9072' having a contribution of 9 * 10^3 or 9000 towards the value of the number"
+                    >
+                      <div className="w-1/2">Multiplier :</div>
+                      <div className="w-1/2">
+                        (0b01 {'<<'}{' '}
+                        {6 * (analyzedString.addUps.length - pos - 1)})
+                      </div>
+                    </div>
+
+                    {settings.showHex && (
+                      <div className="w-full flex">
+                        <div className="w-1/2">Mult. Hex :</div>
+                        <div className="w-1/2">
+                          0x
+                          {addup.multiplier
+                            .toString(16)
+                            .toUpperCase()
+                            .padStart(2, '0')}
+                        </div>
+                      </div>
+                    )}
+
+                    {settings.showDecimal && (
+                      <div className="w-full flex ">
+                        <div className="w-1/2">Mult. Bin:</div>
+                        <div className="w-1/2">
+                          0b01 {'<<'} {Math.log2(addup.multiplier)}
+                        </div>
+                      </div>
+                    )}
+
+                    {settings.showDecimal && (
+                      <div className="w-full flex ">
+                        <div className="w-1/2">Mult. Dec. :</div>
+                        <div className="w-1/2">
+                          2^{Math.log2(addup.multiplier)} = ({addup.multiplier})
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {settings.showCalculations && (
+                  <>
+                    <div className="w-full flex pt-3 ">
+                      <div className="w-1/2">Calculated Values :</div>
+                      <div className="w-1/2">(Value*Multiplier)</div>
+                    </div>
+
+                    {settings.showHex && (
+                      <div className="w-full flex ">
+                        <div className="w-1/2">Hex :</div>
+                        <div className="w-1/2">
+                          0x
+                          {(addup.multiplier * addup.value)
+                            .toString(16)
+                            .toUpperCase()}
+                        </div>
+                      </div>
+                    )}
+
+                    {settings.showDecimal && (
+                      <div className="w-full flex ">
+                        <div className="w-1/2">Dec :</div>
+                        <div className="w-1/2">
+                          {addup.multiplier * addup.value}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+                {settings.showAccumulation && (
+                  <>
+                    <div
+                      className="w-full pt-3 cursor-pointer"
+                      title="(Prev Accum. + Calculated) - The Accumulated Value is the sum of all the calculated values for each byte in the codepoint. This value is then added to the Unicode Scalar Value to get the final value of the codepoint."
+                    >
+                      {' '}
+                      Accumulated Value
+                    </div>
+                    {settings.showHex && (
+                      <div className="w-full flex">
+                        <div className="w-1/2"> Hex - </div>
+                        <div className="w-1/2">
+                          {' '}
+                          0x{addup.accumulation_hex.toUpperCase()}{' '}
+                        </div>
+                      </div>
+                    )}
+                    {settings.showDecimal && (
+                      <div className="w-full flex pb-5">
+                        <div className="w-1/2"> Dec - </div>
+                        <div className="w-1/2"> {addup.accumulation_dec} </div>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {settings.showIncremenetDecrementByte && (
+                  <div className="w-full flex justify-around">
+                    <button
+                      className="bg-blue-500 p-2 text-white px-4 py-4 text-sm "
+                      onClick={(e) => changeByte(e, index, pos, true)}
+                    >
+                      Increment Byte
+                    </button>
+                    <button
+                      className="bg-red-500 p-2 text-white px-4 py-4 text-sm"
+                      onClick={(e) => changeByte(e, index, pos, false)}
+                    >
+                      Decrement Byte
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}
-          <div className="w-full pt-2">
-            Hexadecimal Calculation of Code Point
-          </div>
-          <div className="w-full ">
-            {(
-              analyzedString.addUps.map((addup, i) => {
-                const length_from_end = analyzedString.addUps.length - i - 1;
-                return `0x${addup.value.toString(16)} * 0x${Math.pow(
-                  2,
-                  length_from_end * 6
-                ).toString(16)} ${
-                  i == analyzedString.addUps.length - 1 ? '=' : '+'
-                }  `;
-              }) + ` 0x${analyzedString.codePoint}`
-            )
-              .split(',')
-              .join('')}
-          </div>
-          <div className="w-full pt-3">Decimal Calculation of Code Point</div>
-          <div className="w-full">
-            {(
-              analyzedString.addUps.map((addup, i) => {
-                const length_from_end = analyzedString.addUps.length - i - 1;
-                return `${addup.value.toString(10)} * ${Math.pow(
-                  2,
-                  length_from_end * 6
-                ).toString(10)} ${
-                  i == analyzedString.addUps.length - 1 ? '=' : '+'
-                }  `;
-              }) + ` ${parseInt(analyzedString.codePoint, 16).toString(10)}`
-            )
-              .split(',')
-              .join('')}
-          </div>
+          {settings.showHex && (
+            <>
+              <div className="w-full pt-2">
+                Hexadecimal Calculation of Code Point
+              </div>
+              <div className="w-full ">
+                {(
+                  analyzedString.addUps.map((addup, i) => {
+                    const length_from_end =
+                      analyzedString.addUps.length - i - 1;
+                    return `0x${addup.value.toString(16)} * 0x${Math.pow(
+                      2,
+                      length_from_end * 6
+                    ).toString(16)} ${
+                      i == analyzedString.addUps.length - 1 ? '=' : '+'
+                    }  `;
+                  }) + ` 0x${analyzedString.codePoint}`
+                )
+                  .split(',')
+                  .join('')}
+              </div>
+            </>
+          )}
+          {settings.showDecimal && (
+            <>
+              <div className="w-full pt-3">
+                Decimal Calculation of Code Point
+              </div>
+              <div className="w-full">
+                {(
+                  analyzedString.addUps.map((addup, i) => {
+                    const length_from_end =
+                      analyzedString.addUps.length - i - 1;
+                    return `${addup.value.toString(10)} * ${Math.pow(
+                      2,
+                      length_from_end * 6
+                    ).toString(10)} ${
+                      i == analyzedString.addUps.length - 1 ? '=' : '+'
+                    }  `;
+                  }) + ` ${parseInt(analyzedString.codePoint, 16).toString(10)}`
+                )
+                  .split(',')
+                  .join('')}
+              </div>
+            </>
+          )}
         </div>
       </div>
     );
@@ -687,15 +959,19 @@ const Application = () => {
           {analyzedString.addUps.map((addup, pos) => {
             return (
               <div
-                className="flex flex-wrap w-full md:w-1/2 lg:w-1/4 border border-green-500 pb-5 justify-right pl-3 py-3"
+                className="flex flex-wrap w-full md:w-1/2  border border-green-500 pb-5 justify-right pl-3 py-3"
                 key={addup.accumulation_hex + pos + index}
               >
                 <div className="w-full"> Code Point # {pos + 1} </div>
                 <div className="w-full pt-3"> Code Point Representation </div>
                 <div className="w-full flex">
-                  <div className="w-1/2">Hex Representation :</div>
+                  <div className="w-1/2">Hex :</div>
                   <div className="w-1/2">
-                    0x{addup.two_byte_hex.toUpperCase()}
+                    0x{' '}
+                    {addup.two_byte_hex
+                      .toUpperCase()
+                      .replace(/^0+/, '')
+                      .padStart(4, '0')}
                   </div>
                 </div>
                 {analyzedString.addUps.length > 1 ? (
@@ -724,7 +1000,12 @@ const Application = () => {
                     {addup.surrogate_mask.substring(8, 16)}
                   </div>
                 </div>
-                <div className="w-full flex">
+                <div
+                  className="w-full flex"
+                  title="For Single Surrogate Pair UTF-16 values (< 2^16), the bit value directly encodes the Unicode Scalar Value.
+                For Surrogate Pair UTF-16 values (> 2^16), the first surrogate pairs encodes a 10 bit value (value - 0x10000) and the second surrogate pair encodes the remaining 10 bits.
+                This encoded value is then a 20 bit value that is added to 0x10000 to get the Unicode Scalar Value"
+                >
                   <div className="w-1/2">Encoding Bits :</div>
                   <div className="w-1/2">
                     0b {addup.surrogate_mask.substring(0, 8)}{' '}
@@ -889,7 +1170,10 @@ const Application = () => {
                   <div className="w-1/2"> Binary Representation </div>
                   <div className="w-1/2"> 0b{addup.two_byte_bin} </div>
                 </div>
-                <div className="w-full flex pt-3">
+                <div
+                  className="w-full flex pt-3"
+                  title="With UTF-32, All Bits Are Used To Encode a Value. Although No Unicode Scalar exists past 2^20 + 2^16 -1"
+                >
                   <div className="w-1/2"> Encoding Bits </div>
                   <div className="w-1/2">
                     {' '}
@@ -1065,9 +1349,13 @@ const Application = () => {
       e: React.MouseEvent,
       index: number,
       code_point: number,
-      increment: boolean
+      increment: boolean,
+      increment_value = 1
     ) => {
       //Increment Current Code Point and Recompute String??
+      setLoading(true);
+      setLoadingIndex(index);
+
       const current_string = application.conversions[index].value;
 
       //Get the code_point'th unicode code point from the string
@@ -1082,8 +1370,8 @@ const Application = () => {
       }
 
       const new_codePoint = increment
-        ? codePointToModify + 1
-        : codePointToModify - 1;
+        ? codePointToModify + increment_value
+        : codePointToModify - increment_value;
 
       const new_string = current_string
         .toString()
@@ -1108,6 +1396,10 @@ const Application = () => {
 
       scrollRef.current = e.currentTarget as HTMLElement;
       lastElementRef.current = e.currentTarget as HTMLElement;
+
+      setLoading(false);
+      setLoadingIndex(null);
+
       //setMinimizations([...minimization, false]);
     };
 
@@ -1261,72 +1553,10 @@ const Application = () => {
       );
     }
 
+    //loading modal [Pretty much]
+
     return (
       <div className="flex flex-wrap space-y-12 w-full justify-around">
-        <div className="w-full" key={'Application Information'}>
-          <h1 className="py-5"> Application Details: </h1>
-          <div className="flex flex-col space-y-4 items-center w-full">
-            <label className="flex justify-start w-full">
-              <div className="w-1/5"> Name </div>
-              <input
-                type="text"
-                className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5 ml-2"
-                value={application.name}
-                onChange={(e) =>
-                  setApplication({ ...application, name: e.target.value })
-                }
-              />
-            </label>
-            <label className="flex justify-start w-full">
-              <div className="w-1/5"> Description </div>
-              <input
-                type="text"
-                className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5 ml-2"
-                value={application.description}
-                onChange={(e) =>
-                  setApplication({
-                    ...application,
-                    description: e.target.value,
-                  })
-                }
-              />
-            </label>
-            <label className="flex justify-start w-full">
-              <div className="w-1/5">Created At </div>
-              <input
-                type="text"
-                className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5 ml-2"
-                value={application.created_at}
-                onChange={(e) =>
-                  setApplication({ ...application, created_at: e.target.value })
-                }
-              />
-            </label>
-            <label className="flex justify-start w-full">
-              <div className="w-1/5"> Updated At </div>
-              <input
-                type="text"
-                className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5 ml-2"
-                value={application.updated_at}
-                onChange={(e) =>
-                  setApplication({ ...application, updated_at: e.target.value })
-                }
-              />
-            </label>
-            <label className="flex justify-start w-full">
-              <div className="w-1/5"> Application ID </div>
-              <input
-                type="text"
-                className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5 ml-2"
-                value={application.appid}
-                onChange={(e) =>
-                  setApplication({ ...application, appid: e.target.value })
-                }
-              />
-            </label>
-          </div>
-        </div>
-
         <div className="w-full ">
           {application.conversions.map((conversion, index) => {
             return (
@@ -1334,7 +1564,7 @@ const Application = () => {
                 className="flex flex-wrap justify-around w-full"
                 key={'Application' + index}
               >
-                <div className="w-full flex justify-center p-20 text-4x1">
+                <div className="w-full flex justify-center text-4x1 p-4">
                   <label className="flex justify-center w-full text-3x1">
                     <div className="w-1/7 pr-10"> String {index + 1} :</div>
                     <input
@@ -1379,13 +1609,13 @@ const Application = () => {
                     </div>
                   )}
                 </div>
-                <div className="w-full items-center justify-around p-5 ">
+                <div className="w-full items-center justify-around p-6 ">
                   {/* title called "grapheme component names" */}
                   <h1 className="text-2xl font-bold flex">
                     Grapheme Component Names
                   </h1>
                 </div>
-                <div className="w-full flex items-center flex-wrap justify-start p-5 pb-10">
+                <div className="w-full flex items-center flex-wrap justify-start ">
                   {/* map the names list to a list of <li> elements */}
                   <ol className="w-full flex flex-wrap">
                     {(graphemeNameString[index] || []).map((name, idx) => (
@@ -1426,39 +1656,80 @@ const Application = () => {
                     //This function gets iterates through the lsit of codepoints in stringAnalyzed
                     //Add Button That increments the current codepoint and displays the new stringAnalyzed
 
+                    //
+
                     return (
                       <div
-                        className="flex flex-wrap items-center justify-around space-y-12 "
+                        className="flex flex-wrap items-center justify-around "
                         key={
                           stringAnalyzed2.characterString + code_point + index
                         }
                       >
                         {minimization[index] === false ? (
-                          <div className="flex flex-wrap items-center justify-around space-y-12">
-                            <div className="flex border-t border-gray-200 my-2 w-full">
-                              ------------------------------------
-                            </div>
-                            <div className="w-1/2">
-                              <button
-                                className="bg-blue-500 text-white px-4 py-2 rounded"
-                                onClick={(e) =>
-                                  changeCodepoint(e, index, code_point, true)
+                          <>
+                            {' '}
+                            {loading && (
+                              <FaSpinner
+                                className="animate-spin"
+                                size={40}
+                                key={
+                                  stringAnalyzed2.characterString +
+                                  code_point +
+                                  index
                                 }
-                              >
-                                Increment Code Point
-                              </button>
-                            </div>
-                            <div className="w-1/2">
-                              <button
-                                className="bg-blue-500 text-white px-4 py-2 rounded"
-                                onClick={(e) =>
-                                  changeCodepoint(e, index, code_point, false)
-                                }
-                              >
-                                Decrement Code Point
-                              </button>
-                            </div>
-                          </div>
+                              />
+                            )}
+                            {settings.showIncrementDecrementCodePoint && (
+                              <div className="flex w-full pb-5 justify-around">
+                                <div className=" h-[20px]">
+                                  <button
+                                    className=" text-blue-700 text-xl px-4 py-2 rounded w-full"
+                                    onClick={(e) =>
+                                      changeCodepoint(
+                                        e,
+                                        index,
+                                        code_point,
+                                        true,
+                                        incrementValue
+                                      )
+                                    }
+                                  >
+                                    Increment Code Point [+]
+                                  </button>
+                                </div>
+                                {/* THis is for changing the increment value */}
+                                <div className="h-[20px] border-gray-500">
+                                  <input
+                                    type="number"
+                                    value={incrementValue}
+                                    onChange={(e) =>
+                                      setIncrementValue(
+                                        parseInt(e.target.value)
+                                      )
+                                    }
+                                    className="border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded px-2 py-1"
+                                  />
+                                </div>
+
+                                <div className=" h-[20px]">
+                                  <button
+                                    className=" text-red-700 text-xl px-4 py-2 rounded w-full"
+                                    onClick={(e) =>
+                                      changeCodepoint(
+                                        e,
+                                        index,
+                                        code_point,
+                                        false,
+                                        incrementValue
+                                      )
+                                    }
+                                  >
+                                    Decrement Code Point [-]
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </>
                         ) : null}
                         {AnalyzePanel(stringAnalyzed2, index)}
                       </div>
@@ -1588,15 +1859,13 @@ const Application = () => {
   return (
     <div className="flex flex-wrap justify-center">
       {CheckAuthenticated() ? IsAuthenticatedDisplay() : <div></div>}
-      <div className="w-full flex justify-center">
+      <div className="w-full flex justify-around">
         <button
           className="bg-red-400 text-white px-4 py-2 rounded"
           onClick={() => VisitSaved()}
         >
           View Saved
         </button>
-      </div>
-      <div className="flex pt-10 pb-45 w-full justify-center">
         <button
           className="bg-blue-400 text-white px-4 py-2 rounded"
           onClick={() => saveApplication()}
@@ -1604,6 +1873,7 @@ const Application = () => {
           Save
         </button>
       </div>
+
       <div className="w-full flex justify-around py-10">
         <button
           className={`text-white px-4 py-2 rounded w-1/6 ${
@@ -1630,8 +1900,101 @@ const Application = () => {
           UTF-32
         </button>
       </div>
+      <div className="w-full flex justify-center">
+        <button
+          className="bg-blue-400 text-white px-4 py-2 rounded"
+          onClick={() => setShowModal(true)}
+        >
+          Settings
+        </button>
+      </div>
+      {showModal && (
+        <SettingsModal
+          closeSettingsModal={() => setShowModal(false)}
+          setSetting={(setting: keyof Settings, value: boolean) => {
+            setSettings({ ...settings, [setting]: value });
+          }}
+          currentSettings={settings}
+        />
+      )}
       <div className="flex w-full justify-center pl-4 ">
         {ApplicationDisplay()}
+      </div>
+    </div>
+  );
+};
+
+type DetailsModalProps = {
+  application: ApplicationType;
+  setApplication: (application: ApplicationType) => void;
+};
+
+const DetailsModal: React.FC<DetailsModalProps> = ({
+  application,
+  setApplication,
+}) => {
+  return (
+    <div className="w-full" key={'Application Information'}>
+      <h1 className="py-5"> Application Details: </h1>
+      <div className="flex flex-col space-y-4 items-center w-full">
+        <label className="flex justify-start w-full">
+          <div className="w-1/5"> Name </div>
+          <input
+            type="text"
+            className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5 ml-2"
+            value={application.name}
+            onChange={(e) =>
+              setApplication({ ...application, name: e.target.value })
+            }
+          />
+        </label>
+        <label className="flex justify-start w-full">
+          <div className="w-1/5"> Description </div>
+          <input
+            type="text"
+            className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5 ml-2"
+            value={application.description}
+            onChange={(e) =>
+              setApplication({
+                ...application,
+                description: e.target.value,
+              })
+            }
+          />
+        </label>
+        <label className="flex justify-start w-full">
+          <div className="w-1/5">Created At </div>
+          <input
+            type="text"
+            className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5 ml-2"
+            value={application.created_at}
+            onChange={(e) =>
+              setApplication({ ...application, created_at: e.target.value })
+            }
+          />
+        </label>
+        <label className="flex justify-start w-full">
+          <div className="w-1/5"> Updated At </div>
+          <input
+            type="text"
+            className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5 ml-2"
+            value={application.updated_at}
+            onChange={(e) =>
+              setApplication({ ...application, updated_at: e.target.value })
+            }
+          />
+        </label>
+        <label className="flex justify-start w-full">
+          <div className="w-1/5"> Application ID </div>
+          <input
+            type="text"
+            className="ring-2 ring-blue-500 focus:ring-blue-700 w-1/5 ml-2"
+            value={application.appid}
+            onChange={(e) =>
+              setApplication({ ...application, appid: e.target.value })
+            }
+          />
+        </label>
       </div>
     </div>
   );
