@@ -9,24 +9,19 @@ import { Utf32Examination, analyzeUtf32String } from './utf32';
 import { Settings, SettingsModalProps } from './SettingsModal';
 import SettingsModal from './SettingsModal';
 
+import UTF8AnalyzePanel from './UTf8AnalyzePanel';
+import UTF16AnalyzePanel from './UTF16AnalyzePanel';
+import UTF32AnalyzePanel from './UTF32AnalyzePanel';
+
+import CodePointPanel from './CodepointPanel';
+
+import { ApplicationType, enumeratedConversion } from './common';
+
 //faicon for loading
 import {
   //loading icon
   FaSpinner,
 } from 'react-icons/fa';
-
-type ApplicationType = {
-  appid: string;
-  name: string;
-  created_at: string;
-  updated_at: string;
-  description: string;
-  conversions: enumeratedConversion[];
-};
-
-type enumeratedConversion = {
-  value: string;
-};
 
 //Application Component
 const Application = () => {
@@ -302,16 +297,51 @@ const Application = () => {
       });
   };
 
-  useEffect(() => {
-    /*if (scrollRef.current) {
-            scrollRef.current.scrollIntoView({ behavior: 'smooth' });
-            scrollRef.current = null;
-        }*/
-    /*if (scrollRef.current) {
+  const changeByteUTF8 = async (
+    e: React.MouseEvent<HTMLButtonElement>,
+    index: number,
+    pos: number,
+    increment: boolean,
+    analyzedString: Utf8Examination,
+    setApplication: (application: ApplicationType) => void
+  ) => {
+    const newApplication: ApplicationType | null = {
+      ...application,
+    } as ApplicationType | null;
+    if (!newApplication) return;
+    if (!newApplication.conversions) return;
 
-            scrollRef.current.focus();
-        }*/
-  }, [stringAnalyzed, application]);
+    //How To Decrement The Value
+    const currentBytes = Buffer.from(newApplication.conversions[index].value);
+
+    //Get Codepoint at Position
+
+    currentBytes[pos + analyzedString.position] = increment
+      ? currentBytes[pos + analyzedString.position] + 1
+      : currentBytes[pos + analyzedString.position] - 1;
+    //Get the String
+    const new_string = currentBytes.toString('utf-8');
+    const number_check: number =
+      new_string.codePointAt(pos + analyzedString.position) || 0;
+
+    if (!CheckValidCodePoint(number_check)) {
+      alert('Invalid Code Point');
+      return;
+    }
+
+    newApplication.conversions[index].value = new_string;
+    newApplication.appid = applicationId ?? '';
+    setApplication(newApplication);
+    const newState = await analyzeUtf8String(currentBytes);
+    //Only Change This Index in the derivedState
+    setStringAnalyzed([
+      ...stringAnalyzed.slice(0, index),
+      newState,
+      ...stringAnalyzed.slice(index + 1),
+    ]);
+
+    lastElementRef.current = e.target as HTMLElement;
+  };
 
   if (!application) {
     return <div> </div>;
@@ -366,787 +396,7 @@ const Application = () => {
     return true;
   }
 
-  //Add A Prop That is a function that can be called to modify the the conversion value
-  //For that conversion, then call the function with the new value
-  //from the increment and decrement functionality
-  const AnalyzePanel = (analyzedString: Utf8Examination, index: number) => {
-    if (minimization[index] === true) {
-      return <div></div>;
-    }
-
-    /*
-            Flex Size = 4 in Large, 6 in Medium, 12 in Small
-            Space Around = Max
-            Space Between = Max
-            Align Items = Center
-            Justify Content = Center
-            Direction = Row
-            Wrap = noWrap 
-
-        */
-
-    /*
-            Display 
-            Code point at Position 0: Code Point
-            Number of Bytes : numBytes
-            Grapheme #: Grapheme
-            textRepresentation : chracterRepresentation
-            Name: characterName
-            Raw Hex Representation: hexRepresentation
-            
-            for each    addUp : addUps
-                byte_hex : byte_bin
-                byte_dec(byte_mask) * multiplier = result 
-                Calculated Decimal Value = result_hexadecimal
-
-
-            Add a button that decrements the position by 1 and displays the new analyzedString
-            Add a button that increments the position by 1 and displays the new analyzedString
-
-            You would need to reanalyze the string to get the new analyzedString
-
-            Add a Button That Ups the U+ Value For that codepoint instead of the byte 
-        */
-
-    const changeByte = async (
-      e: React.MouseEvent<HTMLButtonElement>,
-      index: number,
-      pos: number,
-      increment: boolean
-    ) => {
-      const newApplication = { ...application };
-      //How To Decrement The Value
-      const currentBytes = Buffer.from(newApplication.conversions[index].value);
-
-      //Get Codepoint at Position
-
-      currentBytes[pos + analyzedString.position] = increment
-        ? currentBytes[pos + analyzedString.position] + 1
-        : currentBytes[pos + analyzedString.position] - 1;
-      //Get the String
-      const new_string = currentBytes.toString('utf-8');
-      const number_check: number =
-        new_string.codePointAt(pos + analyzedString.position) || 0;
-
-      if (!CheckValidCodePoint(number_check)) {
-        alert('Invalid Code Point');
-        return;
-      }
-
-      newApplication.conversions[index].value = new_string;
-      setApplication(newApplication);
-      const newState = await analyzeUtf8String(currentBytes);
-      //Only Change This Index in the derivedState
-      setStringAnalyzed([
-        ...stringAnalyzed.slice(0, index),
-        newState,
-        ...stringAnalyzed.slice(index + 1),
-      ]);
-
-      lastElementRef.current = e.target as HTMLElement;
-    };
-
-    return (
-      <div
-        className="flex flex-wrap w-full "
-        key={analyzedString.characterString + index}
-      >
-        <div className="w-full">Grapheme # : {analyzedString.grapheme}</div>
-        <div className="w-full">
-          Code point at Position {analyzedString.position} : U+
-          {analyzedString.codePoint}
-        </div>
-        {settings.showGraphemeInfo && (
-          <div className="w-full">
-            <div className="w-1/2">
-              {' '}
-              Number of Bytes : {analyzedString.numBytes}
-            </div>
-
-            <div className="w-1/2">
-              textRepresentation : {analyzedString.characterString}
-            </div>
-            <div className="w-1/2">Name: {analyzedString.characterName}</div>
-            <div className="w-1/2">
-              Raw Hex : 0x{analyzedString.hexRepresentation}
-            </div>
-          </div>
-        )}
-        <div className="py-1 w-full"></div>
-
-        <div className="flex w-full border border-blue-600 flex-wrap text-lg">
-          {analyzedString.addUps.map((addup, pos) => {
-            return (
-              <div
-                className="flex flex-wrap w-full md:w-1/2 lg:w-1/4 border border-green-500 pb-5  justify-right pl-3"
-                key={addup.accumulation_hex + pos + index}
-              >
-                <div className="w-full"> Byte # {pos + 1} </div>
-
-                {/*<div className = 'w-full'>  Byte Hex Representation :0x{addup.byte_hex} 
-                            </div>*/}
-                <div
-                  className="w-full pt-2"
-                  title="The Raw Byte Representation in Hex and Binary Encoding"
-                >
-                  Byte Representation :
-                </div>
-                {settings.showHex && (
-                  <div
-                    className="w-full flex cursor-pointer"
-                    title="The Raw Byte Representation in Hex and Binary Encoding"
-                  >
-                    <div className="w-1/2">Hex :</div>
-                    <div className="w-1/2">0x{addup.byte_hex}</div>
-                  </div>
-                )}
-
-                {settings.showBinary && (
-                  <div
-                    className="w-full flex "
-                    title="The Raw Byte Representation in Hex and Binary Encoding"
-                  >
-                    <div className="w-1/2">Byte Binary :</div>
-                    <div className="w-1/2">0b{addup.byte_bin}</div>
-                  </div>
-                )}
-
-                {settings.showEncodedValues && (
-                  <>
-                    <div className="w-full pt-3">
-                      {' '}
-                      Encoded Values of Byte :{' '}
-                    </div>
-
-                    {settings.showBinary && (
-                      <div
-                        className="w-full flex cursor-pointer"
-                        title="For UTF-8, The Leading Byte Starts with N 1's and 0, where N represents the number of bytes in the codepoint. The following bytes then start with with '10' - called continuation bytes. However, for single byte sequences - codepoints are ASCII-compatible and start with '0' and range from 0x00 - 0xFF. This section demonstrates the bits used to encode a value and excludes the bits encoding sequence length or continuation. 
-                 "
-                      >
-                        <div className="w-1/2">Encoding Bits :</div>
-                        <div className="w-1/2">0b {addup.byte_mask}</div>
-                      </div>
-                    )}
-
-                    {settings.showHex && (
-                      <div className="w-full flex">
-                        <div className="w-1/2">Hex Value :</div>
-                        <div className="w-1/2">
-                          0x {addup.value.toString(16).padStart(2, '0')}
-                        </div>
-                      </div>
-                    )}
-
-                    {settings.showDecimal && (
-                      <div className="w-full flex">
-                        <div className="w-1/2">Decimal Value :</div>
-                        <div className="w-1/2">{addup.value}</div>
-                      </div>
-                    )}
-                  </>
-                )}
-
-                {settings.showMultiplier && (
-                  <>
-                    <div
-                      className="w-full flex pt-3 cursor-pointer"
-                      title="The Multiplier Ressembles the 'Place' that the byte is at - and demonstrates the value that the byte is going to contribute to final unicode scalar value. For UTF-8, this is 2^ [6 * (# bytes after in codepoint)], because continuation bytes have 6 encoding bits. This is equivalent to the '9' in '9072' having a contribution of 9 * 10^3 or 9000 towards the value of the number"
-                    >
-                      <div className="w-1/2">Multiplier :</div>
-                      <div className="w-1/2">
-                        (0b01 {'<<'}{' '}
-                        {6 * (analyzedString.addUps.length - pos - 1)})
-                      </div>
-                    </div>
-
-                    {settings.showHex && (
-                      <div className="w-full flex">
-                        <div className="w-1/2">Mult. Hex :</div>
-                        <div className="w-1/2">
-                          0x
-                          {addup.multiplier
-                            .toString(16)
-                            .toUpperCase()
-                            .padStart(2, '0')}
-                        </div>
-                      </div>
-                    )}
-
-                    {settings.showDecimal && (
-                      <div className="w-full flex ">
-                        <div className="w-1/2">Mult. Bin:</div>
-                        <div className="w-1/2">
-                          0b01 {'<<'} {Math.log2(addup.multiplier)}
-                        </div>
-                      </div>
-                    )}
-
-                    {settings.showDecimal && (
-                      <div className="w-full flex ">
-                        <div className="w-1/2">Mult. Dec. :</div>
-                        <div className="w-1/2">
-                          2^{Math.log2(addup.multiplier)} = ({addup.multiplier})
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-
-                {settings.showCalculations && (
-                  <>
-                    <div className="w-full flex pt-3 ">
-                      <div className="w-1/2">Calculated Values :</div>
-                      <div className="w-1/2">(Value*Multiplier)</div>
-                    </div>
-
-                    {settings.showHex && (
-                      <div className="w-full flex ">
-                        <div className="w-1/2">Hex :</div>
-                        <div className="w-1/2">
-                          0x
-                          {(addup.multiplier * addup.value)
-                            .toString(16)
-                            .toUpperCase()}
-                        </div>
-                      </div>
-                    )}
-
-                    {settings.showDecimal && (
-                      <div className="w-full flex ">
-                        <div className="w-1/2">Dec :</div>
-                        <div className="w-1/2">
-                          {addup.multiplier * addup.value}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-                {settings.showAccumulation && (
-                  <>
-                    <div
-                      className="w-full pt-3 cursor-pointer"
-                      title="(Prev Accum. + Calculated) - The Accumulated Value is the sum of all the calculated values for each byte in the codepoint. This value is then added to the Unicode Scalar Value to get the final value of the codepoint."
-                    >
-                      {' '}
-                      Accumulated Value
-                    </div>
-                    {settings.showHex && (
-                      <div className="w-full flex">
-                        <div className="w-1/2"> Hex - </div>
-                        <div className="w-1/2">
-                          {' '}
-                          0x{addup.accumulation_hex.toUpperCase()}{' '}
-                        </div>
-                      </div>
-                    )}
-                    {settings.showDecimal && (
-                      <div className="w-full flex pb-5">
-                        <div className="w-1/2"> Dec - </div>
-                        <div className="w-1/2"> {addup.accumulation_dec} </div>
-                      </div>
-                    )}
-                  </>
-                )}
-
-                {settings.showIncremenetDecrementByte && (
-                  <div className="w-full flex justify-around">
-                    <button
-                      className="bg-blue-500 p-2 text-white px-4 py-4 text-sm "
-                      onClick={(e) => changeByte(e, index, pos, true)}
-                    >
-                      Increment Byte
-                    </button>
-                    <button
-                      className="bg-red-500 p-2 text-white px-4 py-4 text-sm"
-                      onClick={(e) => changeByte(e, index, pos, false)}
-                    >
-                      Decrement Byte
-                    </button>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-          {settings.showHex && (
-            <>
-              <div className="w-full pt-2">
-                Hexadecimal Calculation of Code Point
-              </div>
-              <div className="w-full ">
-                {(
-                  analyzedString.addUps.map((addup, i) => {
-                    const length_from_end =
-                      analyzedString.addUps.length - i - 1;
-                    return `0x${addup.value.toString(16)} * 0x${Math.pow(
-                      2,
-                      length_from_end * 6
-                    ).toString(16)} ${
-                      i == analyzedString.addUps.length - 1 ? '=' : '+'
-                    }  `;
-                  }) + ` 0x${analyzedString.codePoint}`
-                )
-                  .split(',')
-                  .join('')}
-              </div>
-            </>
-          )}
-          {settings.showDecimal && (
-            <>
-              <div className="w-full pt-3">
-                Decimal Calculation of Code Point
-              </div>
-              <div className="w-full">
-                {(
-                  analyzedString.addUps.map((addup, i) => {
-                    const length_from_end =
-                      analyzedString.addUps.length - i - 1;
-                    return `${addup.value.toString(10)} * ${Math.pow(
-                      2,
-                      length_from_end * 6
-                    ).toString(10)} ${
-                      i == analyzedString.addUps.length - 1 ? '=' : '+'
-                    }  `;
-                  }) + ` ${parseInt(analyzedString.codePoint, 16).toString(10)}`
-                )
-                  .split(',')
-                  .join('')}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  //Add A Prop That is a function that can be called to modify the the conversion value
-  //For that conversion, then call the function with the new value
-  //from the increment and decrement functionality
-  const AnalyzePanelUTF16 = (
-    analyzedString: Utf16Examination,
-    index: number
-  ) => {
-    if (minimization[index] === true) {
-      return <div></div>;
-    }
-
-    /*
-            Flex Size = 4 in Large, 6 in Medium, 12 in Small
-            Space Around = Max
-            Space Between = Max
-            Align Items = Center
-            Justify Content = Center
-            Direction = Row
-            Wrap = noWrap 
-
-        */
-
-    /*
-            Display 
-            Code point at Position 0: Code Point
-            Number of Bytes : numBytes
-            Grapheme #: Grapheme
-            textRepresentation : chracterRepresentation
-            Name: characterName
-            Raw Hex Representation: hexRepresentation
-            
-            for each    addUp : addUps
-                byte_hex : byte_bin
-                byte_dec(byte_mask) * multiplier = result 
-                Calculated Decimal Value = result_hexadecimal
-
-
-            Add a button that decrements the position by 1 and displays the new analyzedString
-            Add a button that increments the position by 1 and displays the new analyzedString
-
-            You would need to reanalyze the string to get the new analyzedString
-
-            Add a Button That Ups the U+ Value For that codepoint instead of the byte 
-        */
-
-    const changeByte = async (
-      e: React.MouseEvent<HTMLButtonElement>,
-      index: number,
-      pos: number,
-      increment: boolean
-    ) => {
-      lastElementRef.current = e.target as HTMLElement;
-    };
-
-    return (
-      <div
-        className="flex flex-wrap w-full "
-        key={analyzedString.characterString + index}
-      >
-        <div className="w-full">Grapheme # : {analyzedString.grapheme}</div>
-        <div className="w-full">
-          Code point at Position {analyzedString.position} : U+
-          {analyzedString.codePoint}
-        </div>
-        <div className="w-full">
-          <div className="w-1/2">
-            {' '}
-            Number of Bytes : {analyzedString.numBytes}
-          </div>
-
-          <div className="w-1/2">
-            textRepresentation : {analyzedString.characterString}
-          </div>
-          <div className="w-1/2">Name: {analyzedString.characterName}</div>
-          <div className="w-1/2">
-            Raw Hex Representation: 0x{analyzedString.hexRepresentation}
-          </div>
-        </div>
-        <div className="py-5 w-full"></div>
-
-        <div className="flex w-full border border-blue-600 flex-wrap">
-          {analyzedString.addUps.map((addup, pos) => {
-            return (
-              <div
-                className="flex flex-wrap w-full md:w-1/2  border border-green-500 pb-5 justify-right pl-3 py-3"
-                key={addup.accumulation_hex + pos + index}
-              >
-                <div className="w-full"> Code Point # {pos + 1} </div>
-                <div className="w-full pt-3"> Code Point Representation </div>
-                <div className="w-full flex">
-                  <div className="w-1/2">Hex :</div>
-                  <div className="w-1/2">
-                    0x{' '}
-                    {addup.two_byte_hex
-                      .toUpperCase()
-                      .replace(/^0+/, '')
-                      .padStart(4, '0')}
-                  </div>
-                </div>
-                {analyzedString.addUps.length > 1 ? (
-                  <div className="w-full flex">
-                    <div className="w-1/2">Surrogate Range:</div>
-                    <div className="w-1/2">
-                      0x{pos == 0 ? 'D800' : 'DC00'} - 0x
-                      {pos == 0 ? 'DBFF' : 'DFFF'}
-                    </div>
-                  </div>
-                ) : (
-                  <div></div>
-                )}
-                <div className="w-full flex">
-                  <div className="w-1/2">Binary Representation:</div>
-                  <div className="w-1/2">0b{addup.two_byte_bin}</div>
-                </div>
-                <div className="w-full pt-3">
-                  {' '}
-                  Encoding Values of Codepoint{' '}
-                </div>
-                <div className="w-full flex">
-                  <div className="w-1/2">Negating Bits :</div>
-                  <div className="w-1/2">
-                    0b {addup.surrogate_mask.substring(0, 8).replace(/x/g, '1')}{' '}
-                    {addup.surrogate_mask.substring(8, 16)}
-                  </div>
-                </div>
-                <div
-                  className="w-full flex"
-                  title="For Single Surrogate Pair UTF-16 values (< 2^16), the bit value directly encodes the Unicode Scalar Value.
-                For Surrogate Pair UTF-16 values (> 2^16), the first surrogate pairs encodes a 10 bit value (value - 0x10000) and the second surrogate pair encodes the remaining 10 bits.
-                This encoded value is then a 20 bit value that is added to 0x10000 to get the Unicode Scalar Value"
-                >
-                  <div className="w-1/2">Encoding Bits :</div>
-                  <div className="w-1/2">
-                    0b {addup.surrogate_mask.substring(0, 8)}{' '}
-                    {addup.surrogate_mask.substring(8, 16)}
-                  </div>
-                </div>
-                <div className="w-full flex">
-                  <div className="w-1/2">Decimal Value :</div>
-                  <div className="w-1/2">
-                    0b{' '}
-                    {addup.value.toString(2).padStart(16, '0').substring(0, 8)}{' '}
-                    {addup.value.toString(2).padStart(16, '0').substring(8, 16)}
-                  </div>
-                </div>
-                <div className="w-full flex">
-                  <div className="w-1/2">Hexadecimal Value :</div>
-                  <div className="w-1/2">
-                    0x{addup.value.toString(16).padStart(4, '0').toUpperCase()}
-                  </div>
-                </div>
-                <div className="w-full flex">
-                  <div className="w-1/2">Decimal Value :</div>
-                  <div className="w-1/2">{addup.value}</div>
-                </div>
-                <div className="w-full flex pt-3">
-                  <div className="w-1/2">Multiplier :</div>
-                  <div className="w-1/2">
-                    2^{Math.log2(addup.multiplier)} ({addup.multiplier})
-                  </div>
-                </div>
-                <div className="w-full flex">
-                  <div className="w-1/2">Multiplier Hex:</div>
-                  <div className="w-1/2">
-                    0x{addup.multiplier.toString(16).padStart(4, '0')}
-                  </div>
-                </div>
-                <div className="w-full flex">
-                  <div className="w-1/2">Multiplier Binary:</div>
-                  <div className="w-1/2">
-                    0b{' '}
-                    {addup.multiplier
-                      .toString(2)
-                      .padStart(16, '0')
-                      .substring(0, 8)}{' '}
-                    {addup.multiplier
-                      .toString(2)
-                      .padStart(16, '0')
-                      .substring(8, 16)}
-                  </div>
-                </div>
-                <div className="w-full flex">
-                  <div className="w-1/2">Multiplier Decimal:</div>
-                  <div className="w-1/2">{addup.multiplier.toString(10)}</div>
-                </div>
-
-                <div className="w-full flex pt-3">
-                  <div className="w-1/2">Calculated Value :</div>
-                  <div className="w-1/2">(Value*Multiplier)</div>
-                </div>
-                <div className="w-full flex">
-                  <div className="w-1/2">Hex :</div>
-                  <div className="w-1/2">
-                    0x
-                    {(addup.multiplier * addup.value)
-                      .toString(16)
-                      .padStart(4, '0')
-                      .toUpperCase()}
-                  </div>
-                </div>
-                <div className="w-full flex">
-                  <div className="w-1/2">Bin :</div>
-                  <div className="w-1/2">
-                    0b{' '}
-                    {(addup.multiplier * addup.value)
-                      .toString(2)
-                      .padStart(16, '0')
-                      .substring(0, 8)}{' '}
-                    {(addup.multiplier * addup.value)
-                      .toString(2)
-                      .padStart(16, '0')
-                      .substring(8, 16)}
-                  </div>
-                </div>
-
-                <div className="w-full flex">
-                  <div className="w-1/2">Decimal :</div>
-                  <div className="w-1/2">{addup.multiplier * addup.value}</div>
-                </div>
-
-                <div className="w-full pt-3">
-                  {' '}
-                  Accumulation Value : (Prev. Accum. + Calculated{' '}
-                  {pos == 1 ? '+ Surrogate Pair (+0x1000)' : ''}){' '}
-                </div>
-                <div className="w-full flex">
-                  <div className="w-1/2"> Dec - </div>
-                  <div className="w-1/2"> {addup.accumulation_dec}</div>
-                </div>
-                <div className="w-full flex">
-                  <div className="w-1/2"> Hex - </div>
-                  <div className="w-1/2">
-                    {' '}
-                    {addup.accumulation_hex.toUpperCase()}
-                  </div>
-                </div>
-                <div className="w-full flex justify-around"></div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  const analyzeUtf32Panel = (
-    analyzedString: Utf32Examination,
-    index: number
-  ) => {
-    if (minimization[index] === true) {
-      return <div></div>;
-    }
-
-    return (
-      <div
-        className="flex flex-wrap w-full "
-        key={analyzedString.characterString + index}
-      >
-        <div className="w-full">Grapheme # : {analyzedString.grapheme}</div>
-        <div className="w-full">
-          Code point at Position {analyzedString.position} : U+
-          {analyzedString.codePoint}
-        </div>
-        <div className="w-full">
-          <div className="w-1/2">
-            {' '}
-            Number of Bytes : {analyzedString.numBytes}
-          </div>
-
-          <div className="w-1/2">
-            textRepresentation : {analyzedString.characterString}
-          </div>
-          <div className="w-1/2">Name: {analyzedString.characterName}</div>
-          <div className="w-1/2">
-            Raw Hex Representation: 0x{analyzedString.hexRepresentation}
-          </div>
-        </div>
-        <div className="py-5 w-full"></div>
-
-        <div className="flex w-full border border-blue-600 flex-wrap">
-          {analyzedString.addUps.map((addup, pos) => {
-            return (
-              <div
-                className="flex flex-wrap w-full md:w-1/2 lg:w-1/4 border border-green-500 pb-5 justify-right"
-                key={addup.accumulation_hex + pos + index}
-              >
-                <div className="w-full"> Code Point # {pos + 1} </div>
-                <div className="w-full flex pt-3">
-                  <div className="w-1/2"> Hex Representation </div>
-                  <div className="w-1/2"> 0x{addup.two_byte_hex} </div>
-                </div>
-                <div className="w-full flex">
-                  <div className="w-1/2"> Binary Representation </div>
-                  <div className="w-1/2"> 0b{addup.two_byte_bin} </div>
-                </div>
-                <div
-                  className="w-full flex pt-3"
-                  title="With UTF-32, All Bits Are Used To Encode a Value. Although No Unicode Scalar exists past 2^20 + 2^16 -1"
-                >
-                  <div className="w-1/2"> Encoding Bits </div>
-                  <div className="w-1/2">
-                    {' '}
-                    0b {''.padStart(11, 'x') + ''.padStart(21, '0')}{' '}
-                  </div>
-                </div>
-                <div className="w-full flex">
-                  <div className="w-1/2"> Binary Byte Value </div>
-                  <div className="w-1/2">
-                    {' '}
-                    0b {addup.value.toString(2).padStart(32, '0')}{' '}
-                  </div>
-                </div>
-
-                <div className="w-full flex">
-                  <div className="w-1/2"> Decimal Byte Value </div>
-                  <div className="w-1/2"> {addup.value.toString(10)} </div>
-                </div>
-                <div className="w-full flex">
-                  <div className="w-1/2"> Hex Value </div>
-                  <div className="w-1/2"> {addup.value.toString(16)} </div>
-                </div>
-                <div className="w-full flex pt-3">
-                  <div className="w-1/2"> Multiplier </div>
-                  <div className="w-1/2">
-                    {' '}
-                    2^{Math.log2(addup.multiplier)} ({addup.multiplier}){' '}
-                  </div>
-                </div>
-                <div className="w-full flex">
-                  <div className="w-1/2"> Calculated Value </div>
-                  <div className="w-1/2"> (Value*Multiplier) </div>
-                </div>
-                <div className="w-full flex">
-                  <div className="w-1/2"> Dec </div>
-                  <div className="w-1/2">
-                    {' '}
-                    {addup.multiplier * addup.value}{' '}
-                  </div>
-                </div>
-                <div className="w-full flex">
-                  <div className="w-1/2"> Hex </div>
-                  <div className="w-1/2">
-                    {' '}
-                    0x{(addup.multiplier * addup.value).toString(16)}
-                  </div>
-                </div>
-                <div className="w-full flex pt-3">
-                  <div className="w-1/2"> Accumulation Value </div>
-                  <div className="w-1/2"> </div>
-                </div>
-                <div className="w-full flex">
-                  <div className="w-1/2"> Dec </div>
-                  <div className="w-1/2"> {addup.accumulation_dec}</div>
-                </div>
-                <div className="w-full flex">
-                  <div className="w-1/2"> Hex </div>
-                  <div className="w-1/2"> 0x{addup.accumulation_hex}</div>
-                </div>
-
-                {/*<div className = 'w-full'> Hex Representation : 0x{addup.two_byte_hex} </div>
-                        <div className='w-full'> Binary Representation : 0b{addup.two_byte_bin} </div>
-                        <div className='w-full'> Encoding Bits : {"".padStart(11,'x')+"".padStart(21,'0')} </div>
-                        <div className='w-full'> Decimal Byte Value : {addup.value.toString(10)} </div>
-                        <div className='w-full'> Hex Value : {addup.value.toString(16)} </div>
-                        <div className='w-full'> Multiplier : 2^{Math.log2(addup.multiplier)} ({addup.multiplier}) </div>
-                        <div className='w-full'> Calculated Value : (Value*Multiplier) </div>
-                        <div className='w-full'> Dec : {addup.multiplier*addup.value} </div>
-                        <div className="w-full"> Hex : 0x{(addup.multiplier*addup.value).toString(16)}</div>
-                        <div className='w-full'> Accumulation Value : </div>
-                        <div className='w-full'> Dec - {(addup.accumulation_dec)}</div>
-                    <div className = "w-full"> Hex - 0x{(addup.accumulation_hex)}</div>*/}
-                <div className="w-full flex justify-around"></div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
   const ApplicationDisplay = () => {
-    /*
-            Flex Size = 4 in Large, 6 in Medium, 12 in Small
-            Space Around = Max
-            Space Between = Max
-            Align Items = Center
-            Justify Content = Center
-            Direction = Row
-            Wrap = noWrap 
-
-
-            Map application.conversions to a list of Display Panels With
-
-            Text Box Input For Character String 
-
-            Sets application.conversions[index] to the value of the input box
-
-            Displays the value of application.conversions[index] in the Display Panel
-
-            Displays the value of the string, converted to byte array, then converted using
-            toString(16) for a hexedecimal representation of the bytes making up the string
-
-        
-
-        //Use analyzeUtf8String to analyze the input string from the user and display its information
-        
-
-            Display the following information about the string:
-
-            Add Button That Adds A New Conversion Listing with the Default String of ""
-
-        */
-
-    /*
-                    For Each application.conversions:
-                    input Box that sets application.conversions[index] to the value of the input box
-
-                    Sets timeout that after 2 seconds of not timing, sets the derivedState[index] to the value 
-                    of the input box passed through Utf8Examination(Buffer.from(input))
-
-                    But the timeout resets when typing occurs
-
-                    Displays An AnalyzePanel For The derivedState[index] 
-                    That Will Asynchronously Update When the asynchronous Utf8Examination is complete
-
-
-                */
-
     const handleTextInputChange = async (
       e: React.ChangeEvent<HTMLInputElement>,
       index: number
@@ -1500,13 +750,6 @@ const Application = () => {
                 </div>
                 {utfVersion === 'utf-8' &&
                   stringAnalyzed[index].map((stringAnalyzed2, code_point) => {
-                    //Analyze Panel, Displaying the stringAnalyzed
-                    //And A button that changes the state by incrementing the Unicode Value
-                    //This function gets iterates through the lsit of codepoints in stringAnalyzed
-                    //Add Button That increments the current codepoint and displays the new stringAnalyzed
-
-                    //
-
                     return (
                       <div
                         className="flex flex-wrap items-center justify-around "
@@ -1529,164 +772,29 @@ const Application = () => {
                               />
                             )}
                             {settings.showIncrementDecrementCodePoint && (
-                              <div className="flex w-full pb-5 justify-around">
-                                <div className=" h-[20px]">
-                                  <button
-                                    className=" text-blue-700 text-xl px-4 py-2 rounded w-full"
-                                    onClick={(e) => {
-                                      if (isNaN(parsedValue)) {
-                                        const error_message =
-                                          incrementMode === 'dec'
-                                            ? 'Increment Value must contain a valid decimal number [0-9]'
-                                            : 'Increment Value must contain a valid hexadecimal number [0-9, a-f]';
-
-                                        setIncrementError(error_message);
-                                        return;
-                                      }
-                                      setIncrementError(null);
-                                      changeCodepoint(
-                                        e,
-                                        index,
-                                        code_point,
-                                        true,
-                                        //increment value -> parse base 10 if dec and base 16 if hex
-                                        //for incrementMode
-                                        parsedValue
-                                      );
-                                    }}
-                                  >
-                                    Increment Code Point [+]
-                                  </button>
-                                </div>
-                                {/* THis is for changing the increment value */}
-                                <div className="h-[20px] border-gray-500">
-                                  <label
-                                    htmlFor="incrementValue"
-                                    className="text-gray-700"
-                                  >
-                                    Increment Ammount:
-                                  </label>
-                                  <input
-                                    id="incrementValue"
-                                    type="text"
-                                    value={incrementValue}
-                                    onChange={(e) =>
-                                      // test if value is valid number
-
-                                      {
-                                        //if increment mode is dec, test if value is a valid decimal number
-                                        //if increment mode is hex, test if value is a valid hex number
-                                        const test_string = e.target
-                                          .value as string;
-
-                                        console.log('Test String', test_string);
-
-                                        //test if value is a valid number based on incrementMode
-                                        let incorrect = false;
-                                        if (
-                                          incrementMode === 'dec' &&
-                                          !/^\d+$/.test(test_string)
-                                        ) {
-                                          console.log('Dec mode');
-                                          incorrect = true;
-                                          setIncrementError(
-                                            'Increment Value must contain a valid decimal number [0-9]'
-                                          );
-                                        } else if (
-                                          incrementMode === 'hex' &&
-                                          !/^[0-9a-fA-F]+$/.test(test_string)
-                                        ) {
-                                          incorrect = true;
-                                          console.log('Hex mode');
-                                          setIncrementError(
-                                            'Increment Value must contain a valid hexadecimal number [0-9, a-f]'
-                                          );
-                                        }
-                                        console.log(
-                                          'Is it incorrect?',
-                                          incorrect
-                                        );
-
-                                        if (!incorrect) {
-                                          setIncrementError(null);
-                                        }
-
-                                        setIncrementValue(
-                                          e.target.value as string
-                                        );
-                                      }
-                                    }
-                                    aria-errormessage={`${incrementError}`}
-                                    className={`
-                                      border-4 
-                                      ${
-                                        incrementError
-                                          ? 'border-red-500'
-                                          : 'border-gray-300 focus:border-blue-500'
-                                      } 
-                                      focus:ring focus:ring-blue-200 rounded px-2 py-1`}
-                                  />
-                                </div>
-                                {/* toggle to set increment mode to hex or dec 
-                                should be a toggle that switches incrementMode between hex and dec
-                                */}
-                                <div className="flex items-center space-x-4">
-                                  <label
-                                    htmlFor="incrementMode"
-                                    className="text-gray-700"
-                                  >
-                                    Increment Mode:
-                                  </label>
-                                  <select
-                                    id="incrementMode"
-                                    value={incrementMode}
-                                    onChange={(e) =>
-                                      setIncrementMode(
-                                        e.target.value as 'hex' | 'dec'
-                                      )
-                                    }
-                                    className="border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded px-2 py-1"
-                                  >
-                                    <option value="dec">Decimal</option>
-                                    <option value="hex">Hexadecimal</option>
-                                  </select>
-                                </div>
-
-                                <div className=" h-[20px]">
-                                  <button
-                                    className=" text-red-700 text-xl px-4 py-2 rounded w-full"
-                                    onClick={(e) => {
-                                      //check parsed value - see if its valid
-                                      if (isNaN(parsedValue)) {
-                                        console.log('parsedValue', parsedValue);
-
-                                        const error_message =
-                                          incrementMode === 'dec'
-                                            ? 'Increment Value must contain a valid decimal number [0-9]'
-                                            : 'Increment Value must contain a valid hexadecimal number [0-9, a-f]';
-
-                                        setIncrementError(error_message);
-                                        return;
-                                      }
-                                      setIncrementError(null);
-
-                                      changeCodepoint(
-                                        e,
-                                        index,
-                                        code_point,
-                                        false,
-                                        parsedValue
-                                      );
-                                    }}
-                                  >
-                                    Decrement Code Point [-]
-                                  </button>
-                                </div>
-                              </div>
+                              <CodePointPanel
+                                incrementError={incrementError}
+                                incrementMode={incrementMode}
+                                incrementValue={incrementValue}
+                                parsedValue={parsedValue}
+                                setIncrementError={setIncrementError}
+                                setIncrementMode={setIncrementMode}
+                                setIncrementValue={setIncrementValue}
+                                changeCodepoint={changeCodepoint}
+                                index={index}
+                                code_point={code_point}
+                              />
                             )}
                           </>
                         ) : null}
-                        {AnalyzePanel(stringAnalyzed2, index)}
+                        <UTF8AnalyzePanel
+                          analyzedString={stringAnalyzed2}
+                          index={index}
+                          settings={settings}
+                          minimization={minimization}
+                          changeByte={changeByteUTF8}
+                          setApplication={setApplication}
+                        />
                       </div>
                     );
                   })}
@@ -1694,39 +802,47 @@ const Application = () => {
                   stringAnalyzed32[index].map((stringAnalyzed2, code_point) => {
                     return (
                       <div
-                        className="flex flex-wrap items-center justify-around space-y-12 "
+                        className="flex flex-wrap items-center justify-around p-2 "
                         key={
                           stringAnalyzed2.characterString + code_point + index
                         }
                       >
                         {minimization[index] === false ? (
-                          <div className="flex flex-wrap items-center justify-around space-y-12">
-                            <div className="flex border-t border-gray-200 my-2 w-full">
-                              -----------------------
-                            </div>
-                            <div className="w-1/2">
-                              <button
-                                className="bg-blue-500 text-white px-4 py-2 rounded"
-                                onClick={(e) =>
-                                  changeCodepoint(e, index, code_point, true)
+                          <>
+                            {loading && (
+                              <FaSpinner
+                                className="animate-spin"
+                                size={40}
+                                key={
+                                  stringAnalyzed2.characterString +
+                                  code_point +
+                                  index
                                 }
-                              >
-                                Increment Code Point
-                              </button>
-                            </div>
-                            <div className="w-1/2">
-                              <button
-                                className="bg-blue-500 text-white px-4 py-2 rounded"
-                                onClick={(e) =>
-                                  changeCodepoint(e, index, code_point, false)
-                                }
-                              >
-                                Decrement Code Point
-                              </button>
-                            </div>
-                          </div>
+                              />
+                            )}
+
+                            {settings.showIncrementDecrementCodePoint && (
+                              <CodePointPanel
+                                incrementError={incrementError}
+                                incrementMode={incrementMode}
+                                incrementValue={incrementValue}
+                                parsedValue={parsedValue}
+                                setIncrementError={setIncrementError}
+                                setIncrementMode={setIncrementMode}
+                                setIncrementValue={setIncrementValue}
+                                changeCodepoint={changeCodepoint}
+                                index={index}
+                                code_point={code_point}
+                              />
+                            )}
+                          </>
                         ) : null}
-                        {analyzeUtf32Panel(stringAnalyzed2, index)}
+                        <UTF32AnalyzePanel
+                          analyzedString={stringAnalyzed2}
+                          index={index}
+                          settings={settings}
+                          minimization={minimization}
+                        />
                       </div>
                     );
                   })}
@@ -1740,33 +856,41 @@ const Application = () => {
                         }
                       >
                         {minimization[index] === false ? (
-                          <div className="flex flex-wrap items-center justify-around space-y-12">
-                            <div className="flex border-t border-gray-200 my-2 w-full">
-                              ----------------------------------------------------------
-                            </div>
-                            <div className="w-1/2">
-                              <button
-                                className="bg-blue-500 text-white px-4 py-2 rounded"
-                                onClick={(e) =>
-                                  changeCodepoint(e, index, code_point, true)
+                          <>
+                            {loading && (
+                              <FaSpinner
+                                className="animate-spin"
+                                size={40}
+                                key={
+                                  stringAnalyzed2.characterString +
+                                  code_point +
+                                  index
                                 }
-                              >
-                                Increment Code Point
-                              </button>
-                            </div>
-                            <div className="w-1/2">
-                              <button
-                                className="bg-blue-500 text-white px-4 py-2 rounded"
-                                onClick={(e) =>
-                                  changeCodepoint(e, index, code_point, false)
-                                }
-                              >
-                                Decrement Code Point
-                              </button>
-                            </div>
-                          </div>
+                              />
+                            )}
+
+                            {settings.showIncrementDecrementCodePoint && (
+                              <CodePointPanel
+                                incrementError={incrementError}
+                                incrementMode={incrementMode}
+                                incrementValue={incrementValue}
+                                parsedValue={parsedValue}
+                                setIncrementError={setIncrementError}
+                                setIncrementMode={setIncrementMode}
+                                setIncrementValue={setIncrementValue}
+                                changeCodepoint={changeCodepoint}
+                                index={index}
+                                code_point={code_point}
+                              />
+                            )}
+                          </>
                         ) : null}
-                        {AnalyzePanelUTF16(stringAnalyzed2, index)}
+                        <UTF16AnalyzePanel
+                          analyzedString={stringAnalyzed2}
+                          index={index}
+                          settings={settings}
+                          minimization={minimization}
+                        />
                       </div>
                     );
                   })}
