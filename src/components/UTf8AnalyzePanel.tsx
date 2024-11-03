@@ -280,46 +280,55 @@ const UTF8AnalyzePanel: React.FC<UTF8PanelProps> = ({
             </div>
           );
         })}
-        {settings.showHex && (
+        {settings.showFinalCalculation && (
           <>
-            <div className="w-full pt-2">
-              Hexadecimal Calculation of Code Point
-            </div>
-            <div className="w-full ">
-              {(
-                analyzedString.addUps.map((addup, i) => {
-                  const length_from_end = analyzedString.addUps.length - i - 1;
-                  return `0x${addup.value.toString(16)} * 0x${Math.pow(
-                    2,
-                    length_from_end * 6
-                  ).toString(16)} ${
-                    i == analyzedString.addUps.length - 1 ? '=' : '+'
-                  }  `;
-                }) + ` 0x${analyzedString.codePoint}`
-              )
-                .split(',')
-                .join('')}
-            </div>
-          </>
-        )}
-        {settings.showDecimal && (
-          <>
-            <div className="w-full pt-3">Decimal Calculation of Code Point</div>
-            <div className="w-full">
-              {(
-                analyzedString.addUps.map((addup, i) => {
-                  const length_from_end = analyzedString.addUps.length - i - 1;
-                  return `${addup.value.toString(10)} * ${Math.pow(
-                    2,
-                    length_from_end * 6
-                  ).toString(10)} ${
-                    i == analyzedString.addUps.length - 1 ? '=' : '+'
-                  }  `;
-                }) + ` ${parseInt(analyzedString.codePoint, 16).toString(10)}`
-              )
-                .split(',')
-                .join('')}
-            </div>
+            {settings.showHex && (
+              <>
+                <div className="w-full pt-2">
+                  Hexadecimal Calculation of Code Point
+                </div>
+                <div className="w-full ">
+                  {(
+                    analyzedString.addUps.map((addup, i) => {
+                      const length_from_end =
+                        analyzedString.addUps.length - i - 1;
+                      return `0x${addup.value.toString(16)} * 0x${Math.pow(
+                        2,
+                        length_from_end * 6
+                      ).toString(16)} ${
+                        i == analyzedString.addUps.length - 1 ? '=' : '+'
+                      }  `;
+                    }) + ` 0x${analyzedString.codePoint}`
+                  )
+                    .split(',')
+                    .join('')}
+                </div>
+              </>
+            )}
+            {settings.showDecimal && (
+              <>
+                <div className="w-full pt-3">
+                  Decimal Calculation of Code Point
+                </div>
+                <div className="w-full">
+                  {(
+                    analyzedString.addUps.map((addup, i) => {
+                      const length_from_end =
+                        analyzedString.addUps.length - i - 1;
+                      return `${addup.value.toString(10)} * ${Math.pow(
+                        2,
+                        length_from_end * 6
+                      ).toString(10)} ${
+                        i == analyzedString.addUps.length - 1 ? '=' : '+'
+                      }  `;
+                    }) +
+                    ` ${parseInt(analyzedString.codePoint, 16).toString(10)}`
+                  )
+                    .split(',')
+                    .join('')}
+                </div>
+              </>
+            )}
           </>
         )}
       </div>

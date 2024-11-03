@@ -131,6 +131,18 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             />
             Show Increment Decrement Code Point
           </label>
+          {/* Encoding Values */}
+          <label className="flex items-center mb-2">
+            <input
+              type="checkbox"
+              checked={currentSettings.showEncodedValues}
+              onChange={(e) =>
+                setSetting('showEncodedValues', e.target.checked)
+              }
+              className="mr-2"
+            />
+            Show Encoded Values
+          </label>
           {/* Show Final Calculation */}
           <label className="flex items-center mb-2">
             <input

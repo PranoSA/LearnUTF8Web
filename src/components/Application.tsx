@@ -752,7 +752,7 @@ const Application = () => {
                   stringAnalyzed[index].map((stringAnalyzed2, code_point) => {
                     return (
                       <div
-                        className="flex flex-wrap items-center justify-around "
+                        className="flex flex-wrap items-center justify-around  pt-20"
                         key={
                           stringAnalyzed2.characterString + code_point + index
                         }
@@ -802,7 +802,7 @@ const Application = () => {
                   stringAnalyzed32[index].map((stringAnalyzed2, code_point) => {
                     return (
                       <div
-                        className="flex flex-wrap items-center justify-around p-2 "
+                        className="flex flex-wrap items-center justify-around  pt-20 "
                         key={
                           stringAnalyzed2.characterString + code_point + index
                         }
@@ -850,7 +850,7 @@ const Application = () => {
                   stringAnalyzed16[index].map((stringAnalyzed2, code_point) => {
                     return (
                       <div
-                        className="flex flex-wrap items-center justify-around space-y-12 "
+                        className="flex flex-wrap items-center justify-around pt-20 "
                         key={
                           stringAnalyzed2.characterString + code_point + index
                         }
